@@ -1,0 +1,19 @@
+{
+    "password": "testing123",
+    "facial_data": {
+        "data": null
+    },
+    "user_id": "nickk1",
+    "pets": [],
+    "personal_info": {
+        "name": "Nick K",
+        "phone_number": "7059911464",
+        "can_be_found_at": "MANSION",
+        "age": "18",
+        "sex_at_birth": "male"
+    },
+    "habits": {
+        "smoking": "Yes",
+        "drinking": "Yes"
+    }
+}

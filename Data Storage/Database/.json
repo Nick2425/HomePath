@@ -1,0 +1,19 @@
+{
+    "password": "",
+    "facial_data": {
+        "data": null
+    },
+    "user_id": "",
+    "pets": [],
+    "personal_info": {
+        "name": "Testing",
+        "phone_number": "",
+        "can_be_found_at": "",
+        "age": "",
+        "sex_at_birth": ""
+    },
+    "habits": {
+        "smoking": "No",
+        "drinking": "No"
+    }
+}

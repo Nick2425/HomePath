@@ -292,23 +292,43 @@
         function saveSettings() {
             const data = {
                 name: document.getElementById('name').value,
-                userid: document.getElementById('userid').value,
+                userId: document.getElementById('userid').value,
                 password: document.getElementById('password').value,
                 phone: document.getElementById('phone').value,
                 age: document.getElementById('age').value,
                 gender: document.getElementById('gender').value,
-                smoking: document.getElementById('smoking').value,
-                drinking: document.getElementById('drinking').value,
+                habits: {
+                    smoking: document.getElementById('smoking').value,
+                    drinking: document.getElementById('drinking').value
+                },
                 pets: {
                     dog: document.getElementById('pet_dog').checked,
                     cat: document.getElementById('pet_cat').checked,
                     other: document.getElementById('pet_other').checked
                 },
                 dependents: document.getElementById('dependents').value,
-                location: document.getElementById('location').value
+                location: document.getElementById('location').value,
+                facialData: null
             };
+
+            // Keep a local copy as well
             localStorage.setItem('homepath_settings', JSON.stringify(data));
-            showSaveModal();
+
+            // Send to backend Flask service
+            fetch('http://localhost:5000/save-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(res => res.json())
+              .then(res => {
+                  if (res && res.success) {
+                      showSaveModal();
+                  } else {
+                      alert('Save failed: ' + (res && res.message ? res.message : 'Unknown'));
+                  }
+              }).catch(err => {
+                  alert('Error saving profile to server: ' + err);
+              });
         }
 
         function showSaveModal(){

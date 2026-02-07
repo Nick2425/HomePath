@@ -5,6 +5,14 @@ import json
 
 app = Flask(__name__, static_folder='..', static_url_path='')
 
+# Allow simple CORS for local development
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
+    return response
+
 @app.route('/')
 def serve_index():
     return send_file('../index.html')

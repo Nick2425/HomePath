@@ -97,6 +97,3 @@ def load_data(filename="stored_data.json"):
         print(f"Error loading data: {e}")
         return None
     
-
-def test():
-    save_data(user_id="Nick_kUijpers_1", password = "shitass", age = 17, gender="Male", smoking_habit="Occasional", drinking_habit="None", pets=["dog"], phone_number="123-456-7890", can_be_found_at="north_city", facial_data={})
