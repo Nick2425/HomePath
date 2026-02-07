@@ -34,7 +34,7 @@
                 <h1 class="font-bold text-2xl tracking-tight text-white">HomePath</h1>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="showScreen('login-screen')" title="Log in" class="bg-white/5 text-white px-3 py-1 rounded-full"><i class="fas fa-sign-in-alt"></i></button>
+                <button id="authBtn" title="Auth" class="bg-white/5 text-white px-3 py-1 rounded-full"><i class="fas fa-sign-in-alt"></i></button>
                 <button class="bg-red-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider">Emergency</button>
             </div>
         </div>
@@ -99,9 +99,11 @@
                 </div>
                 <div class="flex gap-2">
                     <button onclick="loginUser()" class="flex-1 bg-purple-700 py-3 rounded-xl font-bold">Log in</button>
-                        <button onclick="showScreen('home-screen')" class="flex-1 bg-white/5 py-3 rounded-xl font-bold">Cancel</button>
                 </div>
-                <div id="loginMessage" class="text-sm text-yellow-300 mt-3 hidden"></div>
+                <div class="flex items-center justify-between mt-3">
+                    <div id="loginMessage" class="text-sm text-yellow-300" style="min-height:1.2rem"></div>
+                    <a href="create_account.html" class="text-sm text-pink-400 hover:underline">Create account</a>
+                </div>
             </div>
         </div>
 
@@ -374,6 +376,7 @@
                 // mark as authenticated
                 localStorage.setItem('homepath_authenticated','true');
                 localStorage.setItem('homepath_user', userId);
+                updateAuthButton();
                 showScreen('settings-screen');
             }catch(e){ msgEl.innerText = 'Error contacting server'; msgEl.classList.remove('hidden'); }
         }
@@ -385,7 +388,14 @@
             localStorage.removeItem('homepath_user');
             const ids = ['name','userid','password','phone','age','gender','smoking','drinking','pet_dog','pet_cat','pet_other','dependents','location'];
             ids.forEach(id => { const el = document.getElementById(id); if(!el) return; if(el.type==='checkbox') el.checked=false; else el.value=''; });
+            // also clear login inputs and messages
+            const li = document.getElementById('loginUserId'); if(li) li.value='';
+            const lp = document.getElementById('loginPassword'); if(lp) lp.value='';
+            const lm = document.getElementById('loginMessage'); if(lm) lm.classList.add('hidden');
+            // ensure save modal hidden
+            const m = document.getElementById('saveModal'); if(m) m.classList.add('hidden');
             showScreen('home-screen');
+            updateAuthButton();
         }
 
         function initApp(){
@@ -400,6 +410,7 @@
             const m = document.getElementById('saveModal'); if(m) m.classList.add('hidden');
             // Show home screen
             showScreen('home-screen');
+            updateAuthButton();
         }
 
         window.addEventListener('DOMContentLoaded', initApp);
@@ -425,6 +436,21 @@
                 }
                 document.getElementById('dependents').value = (d.personal_info && d.personal_info.dependents) || '';
             }catch(e){ console.warn('populate error', e); }
+        }
+
+        function updateAuthButton(){
+            const auth = localStorage.getItem('homepath_authenticated') === 'true';
+            const btn = document.getElementById('authBtn');
+            if(!btn) return;
+            if(auth){
+                btn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+                btn.title = 'Log out';
+                btn.onclick = () => { if(confirm('Log out?')) logoutUser(); };
+            } else {
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i>';
+                btn.title = 'Log in';
+                btn.onclick = () => showScreen('login-screen');
+            }
         }
 
         function showSettingsScreen(){
