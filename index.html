@@ -11,6 +11,7 @@
         .app-container { width: 100%; height: 100vh; background: rgba(45, 27, 78, 0.6); display: flex; flex-direction: column; position: relative; overflow: hidden; }
         @media (min-width: 768px) { .app-container { width: 375px; height: 812px; border: 12px solid #111; border-radius: 45px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); } }
         .glass-card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .field-value { background: rgba(61, 43, 110, 0.5); border: 1px solid rgba(139, 92, 246, 0.2); }
         .hidden { display: none; }
         #google-map { width: 100%; height: 100%; border-radius: 24px; }
         .pulse-ring { animation: pulse 2s infinite; }
@@ -62,19 +63,105 @@
             <div class="flex-1 mb-24 glass-card rounded-[32px] overflow-hidden"><div id="google-map"></div></div>
         </div>
 
-        <div id="profile-screen" class="screen hidden h-full flex flex-col">
-            <h2 class="text-xl font-bold mb-4">Account Security</h2>
-            
-            <div id="face-auth-box" class="glass-card w-full h-64 rounded-3xl mb-6 relative overflow-hidden flex items-center justify-center">
+        <div id="profile-screen" class="screen hidden h-full flex flex-col overflow-y-auto">
+            <h2 class="text-xl font-bold mb-4">User Profile</h2>
+
+            <div class="glass-card p-4 rounded-3xl mb-4">
+                <form id="profile-form" onsubmit="event.preventDefault(); saveProfile();">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">User ID:</span>
+                            <input id="userIdInput" class="bg-transparent text-right text-xs font-mono outline-none w-1/2" placeholder="Auto-generated">
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Name:</span>
+                            <input id="nameInput" class="bg-transparent text-right text-xs outline-none w-1/2" placeholder="Full name">
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Password:</span>
+                            <input id="passwordInput" type="password" class="bg-transparent text-right text-xs outline-none w-1/2" placeholder="••••••••">
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Phone:</span>
+                            <input id="phoneInput" class="bg-transparent text-right text-xs outline-none w-1/2" placeholder="+1 234 567 8900">
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Age:</span>
+                            <input id="ageInput" type="number" min="0" class="bg-transparent text-right text-xs outline-none w-1/2" placeholder="0">
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Gender:</span>
+                            <select id="genderSelect" class="bg-transparent text-right text-xs outline-none w-1/2">
+                                <option value="">Not specified</option>
+                                <option>Male</option>
+                                <option>Female</option>
+                                <option>Non-binary</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Smoking:</span>
+                            <input id="smokingChk" type="checkbox" class="w-4 h-4">
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Drinking:</span>
+                            <input id="drinkingChk" type="checkbox" class="w-4 h-4">
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Common Location:</span>
+                            <input id="locationInput" class="bg-transparent text-right text-xs outline-none w-1/2" placeholder="e.g. Downtown">
+                        </div>
+
+                        <div class="flex justify-between items-start p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Pet Types:</span>
+                            <div class="flex gap-2 text-xs">
+                                <label><input id="petDog" type="checkbox"> Dog</label>
+                                <label><input id="petCat" type="checkbox"> Cat</label>
+                                <label><input id="petOther" type="checkbox"> Other</label>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Dependents (Kids):</span>
+                            <input id="dependentsInput" type="number" min="0" class="bg-transparent text-right text-xs outline-none w-1/2" placeholder="0">
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 rounded-2xl field-value">
+                            <span class="text-xs opacity-80">Facial Data:</span>
+                            <span id="facialDataDisplay" class="text-right text-xs opacity-60">Not scanned</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 mt-4">
+                        <button type="button" onclick="saveProfile()" class="flex-1 bg-pink-600 py-3 rounded-2xl font-bold text-xs hover:bg-pink-700">Save</button>
+                        <button type="button" onclick="exportProfile()" class="flex-1 bg-white/6 py-3 rounded-2xl font-bold text-xs">Export</button>
+                    </div>
+                    <div class="flex gap-3 mt-3">
+                        <input id="importFile" type="file" accept="application/json" class="hidden" onchange="handleImport(event)">
+                        <button type="button" onclick="document.getElementById('importFile').click()" class="flex-1 bg-white/6 py-3 rounded-2xl font-bold text-xs">Import</button>
+                        <button type="button" onclick="loadProfile()" class="flex-1 bg-white/6 py-3 rounded-2xl font-bold text-xs">Load</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="face-auth-box" class="glass-card w-full h-40 rounded-3xl mb-4 relative overflow-hidden flex items-center justify-center">
                 <div id="face-placeholder" class="text-center">
-                    <i class="fas fa-user-circle text-6xl opacity-20 mb-3"></i>
-                    <p class="text-xs opacity-50">Face ID Identity Required</p>
+                    <i class="fas fa-user-circle text-5xl opacity-20 mb-2"></i>
+                    <p class="text-xs opacity-50">Face ID (optional)</p>
                 </div>
                 <video id="face-video" class="hidden" autoplay playsinline></video>
                 <div id="scanner" class="hidden scan-line"></div>
             </div>
 
-            <button id="auth-btn" onclick="startFaceScan()" class="w-full bg-pink-600 py-4 rounded-2xl font-bold mb-8 hover:bg-pink-700 transition-all">Start Face ID Scan</button>
+            <button id="auth-btn" onclick="startFaceScan()" class="w-full bg-pink-600 py-3 rounded-2xl font-bold mb-4 hover:bg-pink-700 transition-all">Start Face ID Scan</button>
 
             <div class="space-y-3">
                 <div class="glass-card p-4 rounded-2xl flex justify-between items-center"><span class="text-xs font-medium">Dark Mode</span><div class="w-10 h-5 bg-pink-500 rounded-full relative"><div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div></div>
@@ -105,7 +192,8 @@
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-            if(id === 'map-screen') google.maps.event.trigger(map, 'resize');
+            if (id === 'map-screen') google.maps.event.trigger(map, 'resize');
+            if (id === 'profile-screen') loadProfile();
         }
 
         // --- SEARCH BAR LOGIC ---
@@ -154,7 +242,10 @@
                     scanner.classList.add('hidden');
                     btn.innerText = "Identity Verified";
                     btn.classList.replace('bg-pink-600', 'bg-green-600');
+                    const facialId = 'FID-' + Date.now().toString(36).toUpperCase();
+                    document.getElementById('facialDataDisplay').innerText = 'Scanned: ' + facialId;
                     alert("Welcome back. Your facial profile matches HomePath ID: #8821");
+                    stream.getTracks().forEach(track => track.stop());
                 }, 3000);
             } catch (err) {
                 alert("Camera access denied. Please allow camera for Face ID demo.");
@@ -172,6 +263,98 @@
                 document.getElementById('voice-pulse').classList.add('hidden');
             };
             recognition.start();
+        }
+
+        // --- PROFILE DATA PERSISTENCE ---
+        function saveProfile() {
+            const profile = {
+                userId: document.getElementById('userIdInput').value || 'HP-' + Date.now().toString(36).toUpperCase(),
+                name: document.getElementById('nameInput').value || '',
+                password: document.getElementById('passwordInput').value || '',
+                phone: document.getElementById('phoneInput').value || '',
+                age: parseInt(document.getElementById('ageInput').value) || null,
+                gender: document.getElementById('genderSelect').value || '',
+                location: document.getElementById('locationInput').value || '',
+                habits: {
+                    smoking: document.getElementById('smokingChk').checked,
+                    drinking: document.getElementById('drinkingChk').checked
+                },
+                pets: {
+                    hasDog: document.getElementById('petDog').checked,
+                    hasCat: document.getElementById('petCat').checked,
+                    hasOther: document.getElementById('petOther').checked
+                },
+                dependents: parseInt(document.getElementById('dependentsInput').value) || 0,
+                facialData: document.getElementById('facialDataDisplay').innerText
+            };
+            try {
+                localStorage.setItem('homepath_profile', JSON.stringify(profile));
+                if (!document.getElementById('userIdInput').value) {
+                    document.getElementById('userIdInput').value = profile.userId;
+                }
+                alert('Profile saved locally');
+            } catch (e) {
+                alert('Failed to save profile: ' + e.message);
+            }
+        }
+
+        function loadProfile() {
+            try {
+                const raw = localStorage.getItem('homepath_profile');
+                if (!raw) return;
+                const profile = JSON.parse(raw);
+                document.getElementById('userIdInput').value = profile.userId || '';
+                document.getElementById('nameInput').value = profile.name || '';
+                document.getElementById('passwordInput').value = profile.password || '';
+                document.getElementById('phoneInput').value = profile.phone || '';
+                document.getElementById('ageInput').value = profile.age || '';
+                document.getElementById('genderSelect').value = profile.gender || '';
+                document.getElementById('locationInput').value = profile.location || '';
+                document.getElementById('smokingChk').checked = profile.habits ? !!profile.habits.smoking : false;
+                document.getElementById('drinkingChk').checked = profile.habits ? !!profile.habits.drinking : false;
+                document.getElementById('petDog').checked = profile.pets ? !!profile.pets.hasDog : false;
+                document.getElementById('petCat').checked = profile.pets ? !!profile.pets.hasCat : false;
+                document.getElementById('petOther').checked = profile.pets ? !!profile.pets.hasOther : false;
+                document.getElementById('dependentsInput').value = profile.dependents || 0;
+                document.getElementById('facialDataDisplay').innerText = profile.facialData || 'Not scanned';
+            } catch (e) {
+                console.error('Failed to load profile', e);
+            }
+        }
+
+        function exportProfile() {
+            try {
+                const raw = localStorage.getItem('homepath_profile') || '{}';
+                const blob = new Blob([raw], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'homepath_profile.json';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('Export failed: ' + e.message);
+            }
+        }
+
+        function handleImport(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    localStorage.setItem('homepath_profile', JSON.stringify(parsed));
+                    loadProfile();
+                    alert('Profile imported');
+                } catch (err) {
+                    alert('Invalid JSON file');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
         }
 
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }, 1000);
