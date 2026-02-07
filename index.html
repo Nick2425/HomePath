@@ -85,10 +85,92 @@
             <button id="auth-btn" onclick="startFaceScan()" class="w-full bg-pink-600 py-4 rounded-2xl font-bold">Verify Identity</button>
         </div>
 
+        <div id="settings-screen" class="screen hidden h-full flex flex-col overflow-y-auto pb-24">
+            <h2 class="text-xl font-bold mb-6">Settings & Profile</h2>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Name</label>
+                    <input type="text" placeholder="Enter your name" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">User ID</label>
+                    <input type="text" placeholder="Enter your user ID" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Password</label>
+                    <input type="password" placeholder="Enter password" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Phone Number</label>
+                    <input type="tel" placeholder="Enter phone number" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Age</label>
+                    <input type="number" placeholder="Enter age" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Gender</label>
+                    <select class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer-not-to-say">Prefer not to say</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Smoking Habit</label>
+                    <select class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        <option value="">Select option</option>
+                        <option value="non-smoker">Non-smoker</option>
+                        <option value="smoker">Smoker</option>
+                        <option value="occasional">Occasional</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Drinking Habit</label>
+                    <select class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        <option value="">Select option</option>
+                        <option value="non-drinker">Non-drinker</option>
+                        <option value="drinker">Drinker</option>
+                        <option value="occasional">Occasional</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Pets</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" class="rounded"> Dog
+                        </label>
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" class="rounded"> Cat
+                        </label>
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" class="rounded"> Other
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Dependents/Kids</label>
+                    <input type="number" placeholder="Number of dependents" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Common Location</label>
+                    <input type="text" placeholder="Enter your common location" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Facial Data</label>
+                    <button type="button" onclick="startFaceScan()" class="w-full bg-pink-600 py-2 rounded-xl font-bold text-sm">Scan Face</button>
+                </div>
+                <button type="submit" class="w-full bg-pink-600 py-4 rounded-2xl font-bold mt-6">Save Settings</button>
+            </form>
+        </div>
+
         <div class="absolute bottom-8 left-6 right-6 glass-card rounded-[28px] p-2 flex justify-around items-center">
             <button onclick="showScreen('home-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-search"></i></button>
             <button onclick="showScreen('map-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-map-marker-alt"></i></button>
             <button onclick="showScreen('profile-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-user"></i></button>
+            <button onclick="showScreen('settings-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-cog"></i></button>
         </div>
     </div>
 
