@@ -34,7 +34,6 @@
             </div>
             <div class="flex items-center gap-2">
                 <button id="authBtn" onclick="showSettingsScreen()" title="Auth" class="bg-white/5 text-white px-3 py-1 rounded-full"><i class="fas fa-sign-in-alt"></i></button>
-                <button class="bg-red-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider">Emergency</button>
             </div>
         </div>
 
@@ -58,14 +57,14 @@
                        class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
             </div>
 
-            <div class="grid grid-cols-2 gap-3 mb-20">
-                <div onclick="handleSearch('Pet friendly')" class="glass-card p-4 rounded-3xl flex flex-col gap-2 cursor-pointer hover:bg-white/10">
-                    <i class="fas fa-paw text-orange-400"></i>
-                    <span class="text-xs font-bold">Pet Friendly</span>
+            <div class="grid grid-cols-2 gap-2 mb-12">
+                <div onclick="handleSearch('Pet friendly')" class="glass-card p-4 rounded-2xl flex flex-col gap-2 cursor-pointer hover:bg-white/10 items-center justify-center min-h-32">
+                    <i class="fas fa-paw text-orange-400 text-3xl"></i>
+                    <span class="text-base font-bold">Pet Friendly</span>
                 </div>
-                <div onclick="handleSearch('Soup kitchen')" class="glass-card p-4 rounded-3xl flex flex-col gap-2 cursor-pointer hover:bg-white/10">
-                    <i class="fas fa-utensils text-yellow-400"></i>
-                    <span class="text-xs font-bold">Hot Meals</span>
+                <div onclick="handleSearch('Soup kitchen')" class="glass-card p-4 rounded-2xl flex flex-col gap-2 cursor-pointer hover:bg-white/10 items-center justify-center min-h-32">
+                    <i class="fas fa-utensils text-yellow-400 text-3xl"></i>
+                    <span class="text-base font-bold">Hot Meals</span>
                 </div>
             </div>
         </div>
@@ -241,13 +240,13 @@
                 rules: Math.random() > 0.5 ? "Low-barrier" : "Contact for details"
             };
             google.maps.event.addListener(marker, 'click', () => {
-                let content = `<div style="color:#0f172a;padding:12px;font-family:Inter;min-width:280px;">
+                let content = `<div style="color:#0f172a;padding:12px;font-family:Inter;min-width:100px;">
                     <strong style="display:block;font-size:16px;margin-bottom:6px;color:#111;">${place.name}</strong>`;
                 content += `<div style="background:#fff7f9; border:1px solid #fbcfe8; padding:12px; border-radius:12px; margin-top:8px;">
                     <p style="margin:0; color:#be185d; font-weight:700; font-size:14px;">🛏️ ${info.beds} Beds</p>
                     <p style="margin:6px 0 0 0; color:#475569; font-size:12px;">🐾 Pets: ${info.pets}</p>
                     <p style="margin:4px 0 0 0; color:#475569; font-size:12px;">⚖️ ${info.rules}</p></div>`;
-                content += `<button onclick="getDirections({lat:${place.geometry.location.lat()}, lng:${place.geometry.location.lng()}})" style="background:#ec4899;color:white;border:none;padding:12px;width:100%;border-radius:10px;margin-top:12px;cursor:pointer;font-weight:800;">Walk Here</button></div>`;
+                content += `<button onclick="getDirections({lat:${place.geometry.location.lat()}, lng:${place.geometry.location.lng()}})" style="background:#ec4899;color:white;border:none;padding:12px;width:85%;border-radius:10px;margin-top:12px;cursor:pointer;font-weight:800;">Walk Here</button></div>`;
                 infowindow.setContent(content);
                 infowindow.open(map, marker);
             });
