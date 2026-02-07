@@ -17,6 +17,12 @@
         @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
         .scan-line { position: absolute; width: 100%; height: 2px; background: #ec4899; top: 0; animation: scan 2s linear infinite; box-shadow: 0 0 15px #ec4899; z-index: 10; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+        /* Purple scrollbars and wheel styling */
+        * { scrollbar-color: #7c3aed rgba(124,58,237,0.08); scrollbar-width: thin; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(124,58,237,0.08); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 10px; box-shadow: inset 0 0 2px rgba(0,0,0,0.25); }
+        ::-webkit-scrollbar-thumb:hover { background: #6d28d9; }
     </style>
 </head>
 <body>
@@ -66,7 +72,7 @@
             <h2 class="text-xl font-bold mb-4">Nearest Shelters</h2>
             <div class="flex-1 mb-24 glass-card rounded-[32px] overflow-hidden relative">
                 <div id="google-map"></div>
-                <button onclick="recenterMap()" class="absolute top-4 right-4 w-10 h-10 bg-white text-pink-600 rounded-full flex items-center justify-center shadow-lg z-10">
+                <button onclick="recenterMap()" class="absolute top-4 right-4 w-10 h-10 bg-purple-700 text-white rounded-full flex items-center justify-center shadow-lg z-10">
                     <i class="fas fa-crosshairs"></i>
                 </button>
                 <div id="directions-panel" class="absolute bottom-4 left-4 right-4 glass-card p-3 rounded-2xl">
@@ -75,42 +81,34 @@
             </div>
         </div>
 
-        <div id="profile-screen" class="screen hidden h-full flex flex-col">
-            <h2 class="text-xl font-bold mb-4">Identity Verification</h2>
-            <div id="face-box" class="glass-card w-full h-64 rounded-3xl mb-6 relative overflow-hidden flex items-center justify-center bg-black/30">
-                <video id="face-video" class="hidden" autoplay playsinline style="width:100%; height:100%; object-fit:cover; transform: scaleX(-1);"></video>
-                <div id="scanner" class="hidden scan-line"></div>
-                <i id="face-icon" class="fas fa-user-shield text-6xl opacity-20"></i>
-            </div>
-            <button id="auth-btn" onclick="startFaceScan()" class="w-full bg-pink-600 py-4 rounded-2xl font-bold">Verify Identity</button>
-        </div>
+        <!-- Profile screen removed -->
 
         <div id="settings-screen" class="screen hidden h-full flex flex-col overflow-y-auto pb-24">
             <h2 class="text-xl font-bold mb-6">Settings & Profile</h2>
-            <form class="space-y-4">
+            <form id="settingsForm" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Name</label>
-                    <input type="text" placeholder="Enter your name" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <input id="name" name="name" type="text" placeholder="Enter your name" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">User ID</label>
-                    <input type="text" placeholder="Enter your user ID" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <input id="userid" name="userid" type="text" placeholder="Enter your user ID" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Password</label>
-                    <input type="password" placeholder="Enter password" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <input id="password" name="password" type="password" placeholder="Enter password" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Phone Number</label>
-                    <input type="tel" placeholder="Enter phone number" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <input id="phone" name="phone" type="tel" placeholder="Enter phone number" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Age</label>
-                    <input type="number" placeholder="Enter age" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <input id="age" name="age" type="number" placeholder="Enter age" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Gender</label>
-                    <select class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <select id="gender" name="gender" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                         <option value="">Select gender</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
@@ -120,7 +118,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Smoking Habit</label>
-                    <select class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <select id="smoking" name="smoking" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                         <option value="">Select option</option>
                         <option value="non-smoker">Non-smoker</option>
                         <option value="smoker">Smoker</option>
@@ -129,7 +127,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Drinking Habit</label>
-                    <select class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <select id="drinking" name="drinking" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                         <option value="">Select option</option>
                         <option value="non-drinker">Non-drinker</option>
                         <option value="drinker">Drinker</option>
@@ -140,37 +138,48 @@
                     <label class="block text-xs font-bold text-gray-300 mb-2">Pets</label>
                     <div class="space-y-2">
                         <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" class="rounded"> Dog
+                            <input id="pet_dog" name="pet_dog" type="checkbox" class="rounded"> Dog
                         </label>
                         <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" class="rounded"> Cat
+                            <input id="pet_cat" name="pet_cat" type="checkbox" class="rounded"> Cat
                         </label>
                         <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" class="rounded"> Other
+                            <input id="pet_other" name="pet_other" type="checkbox" class="rounded"> Other
                         </label>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-300 mb-2">Dependents/Kids</label>
-                    <input type="number" placeholder="Number of dependents" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Number of Dependents</label>
+                    <input id="dependents" name="dependents" type="number" placeholder="Number of dependents" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Common Location</label>
-                    <input type="text" placeholder="Enter your common location" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <input id="location" name="location" type="text" placeholder="Enter your common location" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                 </div>
+                <button id="saveSettingsBtn" type="button" onclick="saveSettings()" class="w-40 bg-pink-600 py-2 rounded-xl font-bold text-sm mt-2">Save</button>
+
+                <div class="border-t border-white/20 my-4"></div>
+
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Facial Data</label>
-                    <button type="button" onclick="startFaceScan()" class="w-full bg-pink-600 py-2 rounded-xl font-bold text-sm">Scan Face</button>
+                    <button id="scan-face-btn" type="button" onclick="startFaceScan()" class="w-full bg-pink-600 py-2 rounded-xl font-bold text-sm">Scan Face</button>
                 </div>
-                <button type="submit" class="w-full bg-pink-600 py-4 rounded-2xl font-bold mt-6">Save Settings</button>
             </form>
         </div>
 
         <div class="absolute bottom-8 left-6 right-6 glass-card rounded-[28px] p-2 flex justify-around items-center">
             <button onclick="showScreen('home-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-search"></i></button>
             <button onclick="showScreen('map-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-map-marker-alt"></i></button>
-            <button onclick="showScreen('profile-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-user"></i></button>
             <button onclick="showScreen('settings-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-cog"></i></button>
+        </div>
+    </div>
+
+    <!-- Save confirmation modal -->
+    <div id="saveModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white/95 text-gray-900 rounded-xl p-6 w-72 text-center glass-card">
+            <div class="text-2xl text-purple-700 mb-2"><i class="fas fa-check-circle"></i></div>
+            <div class="font-bold mb-2">Settings saved</div>
+            <div class="text-xs text-gray-600 mb-4">Your preferences have been stored locally.</div>
         </div>
     </div>
 
@@ -274,9 +283,39 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 v.srcObject = stream; v.classList.remove('hidden'); s.classList.remove('hidden');
-                document.getElementById('face-icon').classList.add('hidden');
-                setTimeout(() => { s.classList.add('hidden'); document.getElementById('auth-btn').innerText = "Linked Successfully"; document.getElementById('auth-btn').classList.add('bg-green-600'); }, 3000);
+                const scanBtn = document.getElementById('scan-face-btn');
+                if (document.getElementById('face-icon')) document.getElementById('face-icon').classList.add('hidden');
+                setTimeout(() => { s.classList.add('hidden'); if(scanBtn){ scanBtn.innerText = "Linked Successfully"; scanBtn.classList.remove('bg-pink-600'); scanBtn.classList.add('bg-green-600'); } }, 3000);
             } catch (err) { alert("Camera needed."); }
+        }
+
+        function saveSettings() {
+            const data = {
+                name: document.getElementById('name').value,
+                userid: document.getElementById('userid').value,
+                password: document.getElementById('password').value,
+                phone: document.getElementById('phone').value,
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                smoking: document.getElementById('smoking').value,
+                drinking: document.getElementById('drinking').value,
+                pets: {
+                    dog: document.getElementById('pet_dog').checked,
+                    cat: document.getElementById('pet_cat').checked,
+                    other: document.getElementById('pet_other').checked
+                },
+                dependents: document.getElementById('dependents').value,
+                location: document.getElementById('location').value
+            };
+            localStorage.setItem('homepath_settings', JSON.stringify(data));
+            showSaveModal();
+        }
+
+        function showSaveModal(){
+            let m = document.getElementById('saveModal');
+            if(!m) return;
+            m.classList.remove('hidden');
+            setTimeout(()=>{ m.classList.add('hidden'); }, 2200);
         }
 
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(e.target.value); });
