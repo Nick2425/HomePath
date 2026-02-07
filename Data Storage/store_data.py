@@ -45,7 +45,8 @@ def save_data(
             "phone_number": phone_number,
             "can_be_found_at": can_be_found_at,
             "age": age,
-            "sex_at_birth": gender
+            "sex_at_birth": gender,
+            "dependents": dependents
         },
         "habits": {
             "smoking": smoking_habit,

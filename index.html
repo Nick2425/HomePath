@@ -33,7 +33,10 @@
                 <div class="w-10 h-10 bg-pink-600 rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-home text-white"></i></div>
                 <h1 class="font-bold text-2xl tracking-tight text-white">HomePath</h1>
             </div>
-            <button class="bg-red-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider">Emergency</button>
+            <div class="flex items-center gap-2">
+                <button onclick="showScreen('login-screen')" title="Log in" class="bg-white/5 text-white px-3 py-1 rounded-full"><i class="fas fa-sign-in-alt"></i></button>
+                <button class="bg-red-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider">Emergency</button>
+            </div>
         </div>
 
         <div id="home-screen" class="screen flex flex-col h-full">
@@ -82,6 +85,25 @@
         </div>
 
         <!-- Profile screen removed -->
+
+        <div id="login-screen" class="screen hidden h-full flex flex-col items-center justify-start overflow-y-auto pb-24">
+            <h2 class="text-xl font-bold mb-6">Log In</h2>
+            <div class="w-full px-2">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-300 mb-2">User ID</label>
+                    <input id="loginUserId" type="text" placeholder="Enter User ID" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Password</label>
+                    <input id="loginPassword" type="password" placeholder="Enter password" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="loginUser()" class="flex-1 bg-purple-700 py-3 rounded-xl font-bold">Log in</button>
+                    <button onclick="showScreen('settings-screen')" class="flex-1 bg-white/5 py-3 rounded-xl font-bold">Cancel</button>
+                </div>
+                <div id="loginMessage" class="text-sm text-yellow-300 mt-3 hidden"></div>
+            </div>
+        </div>
 
         <div id="settings-screen" class="screen hidden h-full flex flex-col overflow-y-auto pb-24">
             <h2 class="text-xl font-bold mb-6">Settings & Profile</h2>
@@ -329,6 +351,80 @@
               }).catch(err => {
                   alert('Error saving profile to server: ' + err);
               });
+        }
+
+        // Login/logout functions
+        async function loginUser(){
+            const userId = document.getElementById('loginUserId').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const msgEl = document.getElementById('loginMessage');
+            msgEl.classList.add('hidden');
+            if(!userId){ msgEl.innerText = 'Please enter a User ID'; msgEl.classList.remove('hidden'); return; }
+            try{
+                const res = await fetch('http://localhost:5000/load-profile/' + encodeURIComponent(userId));
+                const body = await res.json();
+                if(!body.success){ msgEl.innerText = 'ID not found'; msgEl.classList.remove('hidden'); return; }
+                const data = body.data;
+                // check password (stored at top-level 'password')
+                if((data.password || '') !== password){ msgEl.innerText = 'Wrong password'; msgEl.classList.remove('hidden'); return; }
+                // populate settings form
+                populateSettingsFromData(data);
+                // persist locally
+                localStorage.setItem('homepath_settings', JSON.stringify(data));
+                // mark as authenticated
+                localStorage.setItem('homepath_authenticated','true');
+                localStorage.setItem('homepath_user', userId);
+                showScreen('settings-screen');
+            }catch(e){ msgEl.innerText = 'Error contacting server'; msgEl.classList.remove('hidden'); }
+        }
+
+        function logoutUser(){
+            // clear saved local data and reset form
+            localStorage.removeItem('homepath_settings');
+            localStorage.removeItem('homepath_authenticated');
+            localStorage.removeItem('homepath_user');
+            const ids = ['name','userid','password','phone','age','gender','smoking','drinking','pet_dog','pet_cat','pet_other','dependents','location'];
+            ids.forEach(id => { const el = document.getElementById(id); if(!el) return; if(el.type==='checkbox') el.checked=false; else el.value=''; });
+            showScreen('home-screen');
+        }
+
+        function initApp(){
+            // Ensure app begins logged out
+            localStorage.removeItem('homepath_authenticated');
+            localStorage.removeItem('homepath_user');
+            // Clear login inputs and messages
+            const li = document.getElementById('loginUserId'); if(li) li.value='';
+            const lp = document.getElementById('loginPassword'); if(lp) lp.value='';
+            const lm = document.getElementById('loginMessage'); if(lm) lm.classList.add('hidden');
+            // Hide modal if visible
+            const m = document.getElementById('saveModal'); if(m) m.classList.add('hidden');
+            // Show home screen
+            showScreen('home-screen');
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+
+        function populateSettingsFromData(d){
+            // d is the saved object produced by store_data; map fields safely
+            try{
+                if(d.personal_info){
+                    document.getElementById('name').value = d.personal_info.name || '';
+                    document.getElementById('phone').value = d.personal_info.phone_number || '';
+                    document.getElementById('location').value = d.personal_info.can_be_found_at || '';
+                    document.getElementById('age').value = d.personal_info.age || '';
+                    // sex_at_birth maps to gender
+                    document.getElementById('gender').value = d.personal_info.sex_at_birth || '';
+                }
+                document.getElementById('userid').value = d.user_id || '';
+                document.getElementById('password').value = d.password || '';
+                if(d.habits){ document.getElementById('smoking').value = d.habits.smoking || ''; document.getElementById('drinking').value = d.habits.drinking || ''; }
+                if(Array.isArray(d.pets)){
+                    document.getElementById('pet_dog').checked = d.pets.includes('dog');
+                    document.getElementById('pet_cat').checked = d.pets.includes('cat');
+                    document.getElementById('pet_other').checked = d.pets.includes('other');
+                }
+                document.getElementById('dependents').value = (d.personal_info && d.personal_info.dependents) || '';
+            }catch(e){ console.warn('populate error', e); }
         }
 
         function showSaveModal(){

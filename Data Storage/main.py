@@ -23,19 +23,46 @@ def save_profile():
         data = request.get_json()
         
         # Extract data from the profile
+        # Preserve the actual habit values (e.g., 'smoker', 'non-smoker', 'occasional')
+        smoking_val = None
+        drinking_val = None
+        if isinstance(data.get('habits'), dict):
+            smoking_val = data['habits'].get('smoking')
+            drinking_val = data['habits'].get('drinking')
+
+        # Convert pets booleans to a list of pet types
+        pets_list = []
+        pets_obj = data.get('pets') or {}
+        if isinstance(pets_obj, dict):
+            if pets_obj.get('dog'):
+                pets_list.append('dog')
+            if pets_obj.get('cat'):
+                pets_list.append('cat')
+            if pets_obj.get('other'):
+                pets_list.append('other')
+
+        # Dependents may be sent as a number or string
+        dependents_val = data.get('dependents')
+        try:
+            # normalize to int when possible
+            if dependents_val is not None and dependents_val != "":
+                dependents_val = int(dependents_val)
+        except Exception:
+            dependents_val = None
+
         result = store_data.save_data(
             user_id=data.get('userId'),
             password=data.get('password'),
             age=data.get('age'),
             gender=data.get('gender'),
-            smoking_habit='Yes' if data.get('habits', {}).get('smoking') else 'No',
-            drinking_habit='Yes' if data.get('habits', {}).get('drinking') else 'No',
-            pets=[],  # Can be enhanced to handle pet details
-            dependents=[],  # Can be enhanced
+            smoking_habit=smoking_val,
+            drinking_habit=drinking_val,
+            pets=pets_list,
+            dependents=dependents_val,
             name=data.get('name'),
             phone_number=data.get('phone'),
             can_be_found_at=data.get('location'),
-            facial_data={'data': data.get('facialData')}
+            facial_data=data.get('facialData')
         )
         
         return jsonify({'success': True, 'message': 'Profile saved successfully'})
