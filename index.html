@@ -63,6 +63,34 @@
             <div class="flex-1 mb-24 glass-card rounded-[32px] overflow-hidden"><div id="google-map"></div></div>
         </div>
 
+        <div id="login-screen" class="screen hidden h-full flex flex-col justify-center items-center">
+            <div class="w-full">
+                <h2 class="text-2xl font-bold mb-6 text-center">Authentication Required</h2>
+                <div class="glass-card p-6 rounded-3xl mb-4">
+                    <form id="login-form" onsubmit="event.preventDefault(); authenticateWithPassword();">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-xs opacity-80 block mb-2">User ID:</label>
+                                <input id="loginUserId" type="text" class="w-full bg-white/10 border border-white/20 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500" placeholder="Enter your User ID">
+                            </div>
+                            <div>
+                                <label class="text-xs opacity-80 block mb-2">Password:</label>
+                                <input id="loginPassword" type="password" class="w-full bg-white/10 border border-white/20 rounded-2xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500" placeholder="Enter your password">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-pink-600 py-3 rounded-2xl font-bold text-sm hover:bg-pink-700 mt-4">Login</button>
+                    </form>
+                </div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="flex-1 h-px bg-white/20"></div>
+                    <span class="text-xs opacity-50">OR</span>
+                    <div class="flex-1 h-px bg-white/20"></div>
+                </div>
+                <button onclick="startLoginFaceScan()" class="w-full bg-purple-600 py-3 rounded-2xl font-bold text-sm hover:bg-purple-700">Use Face ID</button>
+                <button onclick="cancelLogin()" class="w-full bg-white/6 py-3 rounded-2xl font-bold text-sm mt-3 hover:bg-white/10">Back</button>
+            </div>
+        </div>
+
         <div id="profile-screen" class="screen hidden h-full flex flex-col overflow-y-auto">
             <h2 class="text-xl font-bold mb-4">User Profile</h2>
 
@@ -142,12 +170,6 @@
 
                     <div class="flex gap-3 mt-4">
                         <button type="button" onclick="saveProfile()" class="flex-1 bg-pink-600 py-3 rounded-2xl font-bold text-xs hover:bg-pink-700">Save</button>
-                        <button type="button" onclick="exportProfile()" class="flex-1 bg-white/6 py-3 rounded-2xl font-bold text-xs">Export</button>
-                    </div>
-                    <div class="flex gap-3 mt-3">
-                        <input id="importFile" type="file" accept="application/json" class="hidden" onchange="handleImport(event)">
-                        <button type="button" onclick="document.getElementById('importFile').click()" class="flex-1 bg-white/6 py-3 rounded-2xl font-bold text-xs">Import</button>
-                        <button type="button" onclick="loadProfile()" class="flex-1 bg-white/6 py-3 rounded-2xl font-bold text-xs">Load</button>
                     </div>
                 </form>
             </div>
@@ -179,6 +201,7 @@
 
     <script>
         let map, service, infowindow;
+        let isAuthenticated = false;
 
         function initMap() {
             const hamilton = { lat: 43.2557, lng: -79.8711 };
@@ -190,10 +213,57 @@
         }
 
         function showScreen(id) {
+            // Check if trying to access profile screen without authentication
+            if (id === 'profile-screen' && !isAuthenticated) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+                document.getElementById('login-screen').classList.remove('hidden');
+                return;
+            }
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             if (id === 'map-screen') google.maps.event.trigger(map, 'resize');
             if (id === 'profile-screen') loadProfile();
+        }
+
+        function authenticateWithPassword() {
+            const userId = document.getElementById('loginUserId').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            
+            if (!userId || !password) {
+                alert('Please enter both User ID and Password');
+                return;
+            }
+            
+            // Get stored profile to validate credentials
+            const raw = localStorage.getItem('homepath_profile');
+            if (!raw) {
+                alert('No profile found. Please create a profile first.');
+                return;
+            }
+            
+            try {
+                const profile = JSON.parse(raw);
+                if (profile.userId === userId && profile.password === password) {
+                    isAuthenticated = true;
+                    document.getElementById('loginUserId').value = '';
+                    document.getElementById('loginPassword').value = '';
+                    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+                    document.getElementById('profile-screen').classList.remove('hidden');
+                    loadProfile();
+                } else {
+                    alert('Invalid User ID or Password');
+                }
+            } catch (e) {
+                alert('Error validating credentials');
+            }
+        }
+
+        function cancelLogin() {
+            isAuthenticated = false;
+            document.getElementById('loginUserId').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById('home-screen').classList.remove('hidden');
         }
 
         // --- SEARCH BAR LOGIC ---
@@ -221,6 +291,71 @@
                 infowindow.setContent(`<div style="color:black; padding:5px;"><strong>${place.name}</strong><br>${place.formatted_address}</div>`);
                 infowindow.open(map, marker);
             });
+        }
+
+        // --- LOGIN FACE ID LOGIC ---
+        async function startLoginFaceScan() {
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = `
+                <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div class="bg-gradient-to-b from-purple-900 to-black p-6 rounded-3xl text-center max-w-sm w-80">
+                        <h3 class="text-xl font-bold mb-4">Face ID Authentication</h3>
+                        <div class="glass-card w-full h-40 rounded-3xl mb-4 relative overflow-hidden flex items-center justify-center">
+                            <div id="login-face-placeholder" class="text-center">
+                                <i class="fas fa-user-circle text-5xl opacity-20 mb-2"></i>
+                                <p class="text-xs opacity-50">Initializing camera...</p>
+                            </div>
+                            <video id="login-face-video" class="hidden" autoplay playsinline></video>
+                            <div id="login-scanner" class="hidden scan-line"></div>
+                        </div>
+                        <p id="login-status" class="text-sm opacity-70 mb-4">Scanning...</p>
+                        <button onclick="cancelFaceScan()" class="w-full bg-white/6 py-2 rounded-2xl font-bold text-xs hover:bg-white/10">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(tempContainer);
+            
+            const video = document.getElementById('login-face-video');
+            const placeholder = document.getElementById('login-face-placeholder');
+            const scanner = document.getElementById('login-scanner');
+            const statusText = document.getElementById('login-status');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                scanner.classList.remove('hidden');
+                statusText.innerText = 'Scanning facial geometry...';
+
+                setTimeout(() => {
+                    scanner.classList.add('hidden');
+                    statusText.innerText = 'Identity verified!';
+                    stream.getTracks().forEach(track => track.stop());
+                    
+                    setTimeout(() => {
+                        isAuthenticated = true;
+                        document.getElementById('loginUserId').value = '';
+                        document.getElementById('loginPassword').value = '';
+                        tempContainer.remove();
+                        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+                        document.getElementById('profile-screen').classList.remove('hidden');
+                        loadProfile();
+                    }, 1000);
+                }, 3000);
+            } catch (err) {
+                statusText.innerText = 'Camera access denied';
+                setTimeout(() => cancelFaceScan(), 2000);
+            }
+        }
+
+        function cancelFaceScan() {
+            const modal = document.querySelector('.fixed.inset-0');
+            if (modal) modal.parentElement.remove();
+            const video = document.getElementById('login-face-video');
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
         }
 
         // --- FACE ID LOGIC ---
