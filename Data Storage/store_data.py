@@ -8,6 +8,13 @@ import json
 import os
 import uuid
 
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_DIR = os.path.join(SCRIPT_DIR, 'Database')
+
+# Ensure Database directory exists
+os.makedirs(DATABASE_DIR, exist_ok=True)
+
 def save_data(
     user_id = None,
     password = None,
@@ -59,9 +66,10 @@ def store_data(data, filename):
         bool: True if storage was successful, False otherwise
     """
     try:
-        with open(str("Data Storage/Database/") + filename, 'w') as f:
+        filepath = os.path.join(DATABASE_DIR, filename)
+        with open(filepath, 'w') as f:
             json.dump(data, f, indent=4)
-        print(f"Data successfully stored in {filename}")
+        print(f"Data successfully stored in {filepath}")
         return True
     except Exception as e:
         print(f"Error storing data: {e}")
@@ -76,13 +84,14 @@ def load_data(filename="stored_data.json"):
         dict: Loaded data or None if file doesn't exist
     """
     try:
-        if os.path.exists(filename):
-            with open("Data Storage/Database/" + filename, 'r') as f:
+        filepath = os.path.join(DATABASE_DIR, filename)
+        if os.path.exists(filepath):
+            with open(filepath, 'r') as f:
                 data = json.load(f)
-            print(f"Data successfully loaded from {filename}")
+            print(f"Data successfully loaded from {filepath}")
             return data
         else:
-            print(f"File {filename} not found")
+            print(f"File {filepath} not found")
             return None
     except Exception as e:
         print(f"Error loading data: {e}")
