@@ -17,7 +17,6 @@
         @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
         .scan-line { position: absolute; width: 100%; height: 2px; background: #ec4899; top: 0; animation: scan 2s linear infinite; box-shadow: 0 0 15px #ec4899; z-index: 10; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-        /* Purple scrollbars and wheel styling */
         * { scrollbar-color: #7c3aed rgba(124,58,237,0.08); scrollbar-width: thin; }
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: rgba(124,58,237,0.08); border-radius: 10px; }
@@ -34,7 +33,7 @@
                 <h1 class="font-bold text-2xl tracking-tight text-white">HomePath</h1>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="showScreen('login-screen')" title="Log in" class="bg-white/5 text-white px-3 py-1 rounded-full"><i class="fas fa-sign-in-alt"></i></button>
+                <button onclick="showSettingsScreen()" title="Log in" class="bg-white/5 text-white px-3 py-1 rounded-full"><i class="fas fa-sign-in-alt"></i></button>
                 <button class="bg-red-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider">Emergency</button>
             </div>
         </div>
@@ -84,8 +83,6 @@
             </div>
         </div>
 
-        <!-- Profile screen removed -->
-
         <div id="login-screen" class="screen hidden h-full flex flex-col items-center justify-start overflow-y-auto pb-24">
             <h2 class="text-xl font-bold mb-6">Log In</h2>
             <div class="w-full px-2">
@@ -99,14 +96,17 @@
                 </div>
                 <div class="flex gap-2">
                     <button onclick="loginUser()" class="flex-1 bg-purple-700 py-3 rounded-xl font-bold">Log in</button>
-                        <button onclick="showScreen('home-screen')" class="flex-1 bg-white/5 py-3 rounded-xl font-bold">Cancel</button>
+                    <button onclick="showScreen('home-screen')" class="flex-1 bg-white/5 py-3 rounded-xl font-bold">Cancel</button>
                 </div>
                 <div id="loginMessage" class="text-sm text-yellow-300 mt-3 hidden"></div>
             </div>
         </div>
 
         <div id="settings-screen" class="screen hidden h-full flex flex-col overflow-y-auto pb-24">
-            <h2 class="text-xl font-bold mb-6">Settings & Profile</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Settings & Profile</h2>
+                <button onclick="logoutUser()" class="text-xs text-red-400 font-bold uppercase">Logout</button>
+            </div>
             <form id="settingsForm" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Name</label>
@@ -130,7 +130,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Gender</label>
-                    <select id="gender" name="gender" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <select id="gender" name="gender" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-400">
                         <option value="">Select gender</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
@@ -140,7 +140,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Smoking Habit</label>
-                    <select id="smoking" name="smoking" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <select id="smoking" name="smoking" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-400">
                         <option value="">Select option</option>
                         <option value="non-smoker">Non-smoker</option>
                         <option value="smoker">Smoker</option>
@@ -149,7 +149,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-300 mb-2">Drinking Habit</label>
-                    <select id="drinking" name="drinking" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                    <select id="drinking" name="drinking" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-400">
                         <option value="">Select option</option>
                         <option value="non-drinker">Non-drinker</option>
                         <option value="drinker">Drinker</option>
@@ -178,39 +178,47 @@
                     <label class="block text-xs font-bold text-gray-300 mb-2">Common Location</label>
                     <input id="location" name="location" type="text" placeholder="Enter your common location" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                 </div>
-                <button id="saveSettingsBtn" type="button" onclick="saveSettings()" class="w-40 bg-pink-600 py-2 rounded-xl font-bold text-sm mt-2">Save</button>
+                <button id="saveSettingsBtn" type="button" onclick="saveSettings()" class="w-full bg-pink-600 py-3 rounded-xl font-bold text-sm mt-2 shadow-lg">Save Settings</button>
 
                 <div class="border-t border-white/20 my-4"></div>
 
-                <div>
-                    <label class="block text-xs font-bold text-gray-300 mb-2">Facial Data</label>
-                    <button id="scan-face-btn" type="button" onclick="startFaceScan()" class="w-full bg-pink-600 py-2 rounded-xl font-bold text-sm">Scan Face</button>
+                <div class="glass-card p-4 rounded-2xl relative overflow-hidden text-center">
+                    <div id="scanner" class="scan-line hidden"></div>
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Facial Biometrics</label>
+                    <video id="face-video" class="w-full h-32 hidden object-cover rounded-lg mb-2 bg-black scale-x-[-1]"></video>
+                    <button id="scan-face-btn" type="button" onclick="startFaceScan()" class="w-full bg-pink-600 py-2 rounded-xl font-bold text-sm">Scan Face ID</button>
                 </div>
             </form>
         </div>
 
-        <div class="absolute bottom-8 left-6 right-6 glass-card rounded-[28px] p-2 flex justify-around items-center">
+        <div class="absolute bottom-8 left-6 right-6 glass-card rounded-[28px] p-2 flex justify-around items-center z-50">
             <button onclick="showScreen('home-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-search"></i></button>
             <button onclick="showScreen('map-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-map-marker-alt"></i></button>
             <button onclick="showSettingsScreen()" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-cog"></i></button>
         </div>
     </div>
 
-    <!-- Save confirmation modal -->
-    <div id="saveModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white/95 text-gray-900 rounded-xl p-6 w-72 text-center glass-card">
-            <div class="text-2xl text-purple-700 mb-2"><i class="fas fa-check-circle"></i></div>
-            <div class="font-bold mb-2">Settings saved</div>
-            <div class="text-xs text-gray-600 mb-4">Your preferences have been stored locally.</div>
+    <div id="saveModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+        <div class="bg-white text-gray-900 rounded-3xl p-6 w-72 text-center shadow-2xl">
+            <div class="text-3xl text-green-500 mb-2"><i class="fas fa-check-circle"></i></div>
+            <div class="font-bold text-lg mb-1">Success!</div>
+            <div class="text-xs text-gray-600">Profile synced with server.</div>
         </div>
     </div>
 
     <script>
+        const PROTOTYPE_DATA = {
+            "Barton-Tiffany Temporary Shelter": { beds: 5, pets: "Yes", rules: "Low-barrier", addr: "250 Hess St N" },
+            "Mary's Place": { beds: 2, pets: "Service animals only", rules: "Alcohol-free", addr: "20 Pearl St N" },
+            "Notre Dame House": { beds: 3, pets: "No", rules: "Alcohol & drug-free", addr: "14 Cannon St W" },
+            "The Family Centre": { beds: 1, pets: "No", rules: "Strictly alcohol/drug-free", addr: "143 Wentworth St S" }
+        };
+
         let map, service, infowindow, directionsService, directionsRenderer, userPos;
         let markers = [];
 
         function initMap() {
-            userPos = {lat: 43.2557, lng: -79.8711}; // Start in Hamilton
+            userPos = {lat: 43.2557, lng: -79.8711};
             map = new google.maps.Map(document.getElementById("google-map"), {
                 zoom: 15, center: userPos, disableDefaultUI: true,
                 styles: [{ "featureType": "poi.business", "stylers": [{ "visibility": "off" }] }, { "featureType": "landscape", "stylers": [{ "color": "#2d1b4e" }] }]
@@ -236,41 +244,24 @@
 
         function handleSearch(val) {
             const input = val.toLowerCase();
-            // EXTENDED SAFETY FILTER
             const blocked = ["weed", "drug", "alcohol", "sex", "adult", "party", "club", "bar", "strip"];
             if (blocked.some(w => input.includes(w))) {
-                document.getElementById('status-text').innerText = "Safe search active. Finding housing.";
+                document.getElementById('status-text').innerText = "Safe search active.";
                 performSearch("Homeless Shelter");
                 return;
             }
-
             showScreen('map-screen');
             performSearch(val + " Homeless Shelter");
         }
 
         function performSearch(query) {
-            const request = {
-                location: userPos,
-                rankBy: google.maps.places.RankBy.DISTANCE,
-                keyword: query
-            };
-
+            const request = { location: userPos, radius: '5000', keyword: query };
             service = new google.maps.places.PlacesService(map);
             service.nearbySearch(request, (results, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
                     clearMarkers();
                     results.forEach(createMarker);
-                    // Automatically get directions to the VERY NEAREST one found
                     getDirections(results[0].geometry.location);
-                }
-            });
-        }
-
-        function getDirections(dest) {
-            directionsService.route({ origin: userPos, destination: dest, travelMode: 'WALKING' }, (result, status) => {
-                if (status == 'OK') {
-                    directionsRenderer.setDirections(result);
-                    document.getElementById('route-info').innerText = "Walk to nearest: " + result.routes[0].legs[0].duration.text;
                 }
             });
         }
@@ -278,25 +269,101 @@
         function createMarker(place) {
             const marker = new google.maps.Marker({ map: map, position: place.geometry.location });
             markers.push(marker);
+            let prototype = null;
+            for (let name in PROTOTYPE_DATA) {
+                if (place.name.toLowerCase().includes(name.toLowerCase().split(' ')[0])) {
+                    prototype = PROTOTYPE_DATA[name];
+                    break;
+                }
+            }
             google.maps.event.addListener(marker, 'click', () => {
-                infowindow.setContent(`<div style="color:black;padding:10px;"><strong>${place.name}</strong><br><button onclick="getDirections({lat:${place.geometry.location.lat()}, lng:${place.geometry.location.lng()}})" style="background:#ec4899;color:white;border:none;padding:5px;margin-top:5px;cursor:pointer;">Walk Here</button></div>`);
+                let content = `<div style="color:black;padding:10px;font-family:sans-serif;min-width:180px;"><strong style="font-size:14px;">${place.name}</strong><br>`;
+                if(prototype) {
+                    content += `<div style="background:#fdf2f8; border:1px solid #ec4899; padding:8px; border-radius:12px; margin-top:8px;">
+                        <p style="margin:0; color:#db2777; font-weight:bold; font-size:12px;">🛏️ ${prototype.beds} Beds Left</p>
+                        <p style="margin:2px 0 0 0; color:#4b5563; font-size:10px;">🐾 Pets: ${prototype.pets}</p>
+                        <p style="margin:2px 0 0 0; color:#4b5563; font-size:10px;">⚖️ ${prototype.rules}</p></div>`;
+                }
+                content += `<button onclick="getDirections({lat:${place.geometry.location.lat()}, lng:${place.geometry.location.lng()}})" style="background:#ec4899;color:white;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer;font-weight:bold;">Walk Here</button></div>`;
+                infowindow.setContent(content);
                 infowindow.open(map, marker);
             });
         }
 
-        function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
-        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+        function getDirections(dest) {
+            directionsService.route({ origin: userPos, destination: dest, travelMode: 'WALKING' }, (result, status) => {
+                if (status == 'OK') {
+                    directionsRenderer.setDirections(result);
+                    document.getElementById('route-info').innerText = "Walk: " + result.routes[0].legs[0].duration.text;
+                }
+            });
+        }
 
         function startVoice() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
+            if (!SpeechRecognition) { alert("Mic not supported in this browser. Use Chrome."); return; }
             const recognition = new SpeechRecognition();
-            recognition.onstart = () => document.getElementById('voice-pulse').classList.remove('hidden');
+            const pulse = document.getElementById('voice-pulse');
+            const status = document.getElementById('status-text');
+            recognition.onstart = () => { pulse.classList.remove('hidden'); status.innerText = "Listening..."; };
             recognition.onresult = (e) => {
-                handleSearch(e.results[0][0].transcript);
-                document.getElementById('voice-pulse').classList.add('hidden');
+                const transcript = e.results[0][0].transcript;
+                document.getElementById('searchInput').value = transcript;
+                handleSearch(transcript);
             };
+            recognition.onerror = () => { pulse.classList.add('hidden'); status.innerText = "Mic Error. Tap to try again."; };
+            recognition.onend = () => pulse.classList.add('hidden');
             recognition.start();
+        }
+
+        async function loginUser(){
+            const userId = document.getElementById('loginUserId').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const msgEl = document.getElementById('loginMessage');
+            msgEl.classList.add('hidden');
+            if(!userId){ msgEl.innerText = 'Enter User ID'; msgEl.classList.remove('hidden'); return; }
+            try {
+                const res = await fetch('http://localhost:5000/load-profile/' + encodeURIComponent(userId));
+                const body = await res.json();
+                if(body.success && body.data.password === password) {
+                    populateSettingsFromData(body.data);
+                    localStorage.setItem('homepath_authenticated','true');
+                    showScreen('settings-screen');
+                } else { msgEl.innerText = 'Invalid credentials'; msgEl.classList.remove('hidden'); }
+            } catch(e) { msgEl.innerText = 'Server offline'; msgEl.classList.remove('hidden'); }
+        }
+
+        function saveSettings() {
+            const petsArr = [];
+            if(document.getElementById('pet_dog').checked) petsArr.push('dog');
+            if(document.getElementById('pet_cat').checked) petsArr.push('cat');
+            if(document.getElementById('pet_other').checked) petsArr.push('other');
+            const data = {
+                name: document.getElementById('name').value, user_id: document.getElementById('userid').value, password: document.getElementById('password').value,
+                personal_info: { phone_number: document.getElementById('phone').value, age: document.getElementById('age').value, sex_at_birth: document.getElementById('gender').value, dependents: document.getElementById('dependents').value, can_be_found_at: document.getElementById('location').value },
+                habits: { smoking: document.getElementById('smoking').value, drinking: document.getElementById('drinking').value }, pets: petsArr
+            };
+            fetch('http://localhost:5000/save-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            .then(res => res.json()).then(res => { if (res.success) showSaveModal(); }).catch(e => alert('Server connection error'));
+        }
+
+        function populateSettingsFromData(d){
+            if(d.personal_info){
+                document.getElementById('name').value = d.personal_info.name || '';
+                document.getElementById('phone').value = d.personal_info.phone_number || '';
+                document.getElementById('location').value = d.personal_info.can_be_found_at || '';
+                document.getElementById('age').value = d.personal_info.age || '';
+                document.getElementById('gender').value = d.personal_info.sex_at_birth || '';
+                document.getElementById('dependents').value = d.personal_info.dependents || '';
+            }
+            document.getElementById('userid').value = d.user_id || '';
+            document.getElementById('password').value = d.password || '';
+            if(d.habits){ document.getElementById('smoking').value = d.habits.smoking || ''; document.getElementById('drinking').value = d.habits.drinking || ''; }
+            if(Array.isArray(d.pets)){
+                document.getElementById('pet_dog').checked = d.pets.includes('dog');
+                document.getElementById('pet_cat').checked = d.pets.includes('cat');
+                document.getElementById('pet_other').checked = d.pets.includes('other');
+            }
         }
 
         async function startFaceScan() {
@@ -305,150 +372,18 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 v.srcObject = stream; v.classList.remove('hidden'); s.classList.remove('hidden');
-                const scanBtn = document.getElementById('scan-face-btn');
-                if (document.getElementById('face-icon')) document.getElementById('face-icon').classList.add('hidden');
-                setTimeout(() => { s.classList.add('hidden'); if(scanBtn){ scanBtn.innerText = "Linked Successfully"; scanBtn.classList.remove('bg-pink-600'); scanBtn.classList.add('bg-green-600'); } }, 3000);
-            } catch (err) { alert("Camera needed."); }
+                setTimeout(() => { s.classList.add('hidden'); const btn = document.getElementById('scan-face-btn'); btn.innerText = "Linked"; btn.className = "w-full bg-green-600 py-2 rounded-xl font-bold text-sm"; }, 3000);
+            } catch (err) { alert("Camera required."); }
         }
 
-        function saveSettings() {
-            const data = {
-                name: document.getElementById('name').value,
-                userId: document.getElementById('userid').value,
-                password: document.getElementById('password').value,
-                phone: document.getElementById('phone').value,
-                age: document.getElementById('age').value,
-                gender: document.getElementById('gender').value,
-                habits: {
-                    smoking: document.getElementById('smoking').value,
-                    drinking: document.getElementById('drinking').value
-                },
-                pets: {
-                    dog: document.getElementById('pet_dog').checked,
-                    cat: document.getElementById('pet_cat').checked,
-                    other: document.getElementById('pet_other').checked
-                },
-                dependents: document.getElementById('dependents').value,
-                location: document.getElementById('location').value,
-                facialData: null
-            };
-
-            // Keep a local copy as well
-            localStorage.setItem('homepath_settings', JSON.stringify(data));
-
-            // Send to backend Flask service
-            fetch('http://localhost:5000/save-profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).then(res => res.json())
-              .then(res => {
-                  if (res && res.success) {
-                      showSaveModal();
-                  } else {
-                      alert('Save failed: ' + (res && res.message ? res.message : 'Unknown'));
-                  }
-              }).catch(err => {
-                  alert('Error saving profile to server: ' + err);
-              });
-        }
-
-        // Login/logout functions
-        async function loginUser(){
-            const userId = document.getElementById('loginUserId').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const msgEl = document.getElementById('loginMessage');
-            msgEl.classList.add('hidden');
-            if(!userId){ msgEl.innerText = 'Please enter a User ID'; msgEl.classList.remove('hidden'); return; }
-            try{
-                const res = await fetch('http://localhost:5000/load-profile/' + encodeURIComponent(userId));
-                const body = await res.json();
-                if(!body.success){ msgEl.innerText = 'ID not found'; msgEl.classList.remove('hidden'); return; }
-                const data = body.data;
-                // check password (stored at top-level 'password')
-                if((data.password || '') !== password){ msgEl.innerText = 'Wrong password'; msgEl.classList.remove('hidden'); return; }
-                // populate settings form
-                populateSettingsFromData(data);
-                // persist locally
-                localStorage.setItem('homepath_settings', JSON.stringify(data));
-                // mark as authenticated
-                localStorage.setItem('homepath_authenticated','true');
-                localStorage.setItem('homepath_user', userId);
-                showScreen('settings-screen');
-            }catch(e){ msgEl.innerText = 'Error contacting server'; msgEl.classList.remove('hidden'); }
-        }
-
-        function logoutUser(){
-            // clear saved local data and reset form
-            localStorage.removeItem('homepath_settings');
-            localStorage.removeItem('homepath_authenticated');
-            localStorage.removeItem('homepath_user');
-            const ids = ['name','userid','password','phone','age','gender','smoking','drinking','pet_dog','pet_cat','pet_other','dependents','location'];
-            ids.forEach(id => { const el = document.getElementById(id); if(!el) return; if(el.type==='checkbox') el.checked=false; else el.value=''; });
-            showScreen('home-screen');
-        }
-
-        function initApp(){
-            // Ensure app begins logged out
-            localStorage.removeItem('homepath_authenticated');
-            localStorage.removeItem('homepath_user');
-            // Clear login inputs and messages
-            const li = document.getElementById('loginUserId'); if(li) li.value='';
-            const lp = document.getElementById('loginPassword'); if(lp) lp.value='';
-            const lm = document.getElementById('loginMessage'); if(lm) lm.classList.add('hidden');
-            // Hide modal if visible
-            const m = document.getElementById('saveModal'); if(m) m.classList.add('hidden');
-            // Show home screen
-            showScreen('home-screen');
-        }
-
-        window.addEventListener('DOMContentLoaded', initApp);
-
-        function populateSettingsFromData(d){
-            // d is the saved object produced by store_data; map fields safely
-            try{
-                if(d.personal_info){
-                    document.getElementById('name').value = d.personal_info.name || '';
-                    document.getElementById('phone').value = d.personal_info.phone_number || '';
-                    document.getElementById('location').value = d.personal_info.can_be_found_at || '';
-                    document.getElementById('age').value = d.personal_info.age || '';
-                    // sex_at_birth maps to gender
-                    document.getElementById('gender').value = d.personal_info.sex_at_birth || '';
-                }
-                document.getElementById('userid').value = d.user_id || '';
-                document.getElementById('password').value = d.password || '';
-                if(d.habits){ document.getElementById('smoking').value = d.habits.smoking || ''; document.getElementById('drinking').value = d.habits.drinking || ''; }
-                if(Array.isArray(d.pets)){
-                    document.getElementById('pet_dog').checked = d.pets.includes('dog');
-                    document.getElementById('pet_cat').checked = d.pets.includes('cat');
-                    document.getElementById('pet_other').checked = d.pets.includes('other');
-                }
-                document.getElementById('dependents').value = (d.personal_info && d.personal_info.dependents) || '';
-            }catch(e){ console.warn('populate error', e); }
-        }
-
-        function showSettingsScreen(){
-            const auth = localStorage.getItem('homepath_authenticated') === 'true';
-            if(auth){
-                showScreen('settings-screen');
-                return;
-            }
-            // clear login inputs and message then show login prompt
-            const li = document.getElementById('loginUserId'); if(li) li.value='';
-            const lp = document.getElementById('loginPassword'); if(lp) lp.value='';
-            const lm = document.getElementById('loginMessage'); if(lm) lm.classList.add('hidden');
-            showScreen('login-screen');
-        }
-
-        function showSaveModal(){
-            let m = document.getElementById('saveModal');
-            if(!m) return;
-            m.classList.remove('hidden');
-            setTimeout(()=>{ m.classList.add('hidden'); }, 2200);
-        }
-
+        function logoutUser(){ localStorage.clear(); location.reload(); }
+        function showSettingsScreen(){ if(localStorage.getItem('homepath_authenticated') === 'true') showScreen('settings-screen'); else showScreen('login-screen'); }
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+        function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
+        function showSaveModal(){ document.getElementById('saveModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('saveModal').classList.add('hidden'), 2200); }
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(e.target.value); });
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }, 1000);
+        window.addEventListener('DOMContentLoaded', () => showScreen('home-screen'));
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLMXwr9sKwVV28V3hzeJzrD6h0X-4w0d0&libraries=places&callback=initMap" async defer></script>
 </body>
