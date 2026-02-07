@@ -6,19 +6,21 @@
 
 import json
 import os
-
+import uuid
 
 def save_data(
+    user_id = None,
+    password = None,
     age = None,
-    sex_at_birth = None,
+    gender = None,
     smoking_habit = None,
     drinking_habit = None,
     pets = [],
+    dependents = [],
     name = None,
     phone_number = None,
     can_be_found_at = "",
     facial_data = {},
-    password = None
 ):
     
     """
@@ -29,21 +31,21 @@ def save_data(
     data = {
         "password": password,
         "facial_data": facial_data,
-        "user_id": name,
+        "user_id": user_id,
         "pets": pets,
         "personal_info": {
             "name": name,
             "phone_number": phone_number,
             "can_be_found_at": can_be_found_at,
             "age": age,
-            "sex_at_birth": sex_at_birth
+            "sex_at_birth": gender
         },
         "habits": {
             "smoking": smoking_habit,
             "drinking": drinking_habit
         }
     }
-    store_data(data, f"{name}.json")
+    store_data(data, f"{user_id}.json")
 
 def store_data(data, filename):
     """
@@ -57,7 +59,7 @@ def store_data(data, filename):
         bool: True if storage was successful, False otherwise
     """
     try:
-        with open(filename, 'w') as f:
+        with open(str("Data Storage/Database/") + filename, 'w') as f:
             json.dump(data, f, indent=4)
         print(f"Data successfully stored in {filename}")
         return True
@@ -75,7 +77,7 @@ def load_data(filename="stored_data.json"):
     """
     try:
         if os.path.exists(filename):
-            with open(filename, 'r') as f:
+            with open("Data Storage/Database/" + filename, 'r') as f:
                 data = json.load(f)
             print(f"Data successfully loaded from {filename}")
             return data
@@ -86,4 +88,6 @@ def load_data(filename="stored_data.json"):
         print(f"Error loading data: {e}")
         return None
     
-save_data(17, user_id="Nick", sex_at_birth="Male", smoking_habit="Occasional", drinking_habit="None", pets=["dog"], phone_number="123-456-7890", can_be_found_at="north_city", facial_data={})
+
+def test():
+    save_data(user_id="Nick_kUijpers_1", password = "shitass", age = 17, gender="Male", smoking_habit="Occasional", drinking_habit="None", pets=["dog"], phone_number="123-456-7890", can_be_found_at="north_city", facial_data={})
