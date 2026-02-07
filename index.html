@@ -33,11 +33,7 @@
                 <h1 class="font-bold text-2xl tracking-tight text-white">HomePath</h1>
             </div>
             <div class="flex items-center gap-2">
-<<<<<<< HEAD
                 <button id="authBtn" title="Auth" class="bg-white/5 text-white px-3 py-1 rounded-full"><i class="fas fa-sign-in-alt"></i></button>
-=======
-                <button onclick="showSettingsScreen()" title="Log in" class="bg-white/5 text-white px-3 py-1 rounded-full"><i class="fas fa-sign-in-alt"></i></button>
->>>>>>> c3e525bd320c83b3832d32602c6be9c0481fb947
                 <button class="bg-red-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider">Emergency</button>
             </div>
         </div>
@@ -100,10 +96,6 @@
                 </div>
                 <div class="flex gap-2">
                     <button onclick="loginUser()" class="flex-1 bg-purple-700 py-3 rounded-xl font-bold">Log in</button>
-<<<<<<< HEAD
-=======
-                    <button onclick="showScreen('home-screen')" class="flex-1 bg-white/5 py-3 rounded-xl font-bold">Cancel</button>
->>>>>>> c3e525bd320c83b3832d32602c6be9c0481fb947
                 </div>
                 <div class="flex items-center justify-between mt-3">
                     <div id="loginMessage" class="text-sm text-yellow-300" style="min-height:1.2rem"></div>
@@ -287,14 +279,15 @@
                 }
             }
             google.maps.event.addListener(marker, 'click', () => {
-                let content = `<div style="color:black;padding:10px;font-family:sans-serif;min-width:180px;"><strong style="font-size:14px;">${place.name}</strong><br>`;
+                let content = `<div style="color:#0f172a;padding:12px;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;margin:0;min-width:280px;max-width:360px;">
+                    <strong style="display:block;font-size:16px;margin-bottom:6px;color:#111;font-weight:700;">${place.name}</strong>`;
                 if(prototype) {
-                    content += `<div style="background:#fdf2f8; border:1px solid #ec4899; padding:8px; border-radius:12px; margin-top:8px;">
-                        <p style="margin:0; color:#db2777; font-weight:bold; font-size:12px;">🛏️ ${prototype.beds} Beds Left</p>
-                        <p style="margin:2px 0 0 0; color:#4b5563; font-size:10px;">🐾 Pets: ${prototype.pets}</p>
-                        <p style="margin:2px 0 0 0; color:#4b5563; font-size:10px;">⚖️ ${prototype.rules}</p></div>`;
+                    content += `<div style="background:#fff7f9; border:1px solid #fbcfe8; padding:12px; border-radius:12px; margin-top:8px;">
+                        <p style="margin:0; color:#be185d; font-weight:700; font-size:14px;">🛏️ ${prototype.beds} Beds Left</p>
+                        <p style="margin:6px 0 0 0; color:#475569; font-size:12px;">🐾 Pets: ${prototype.pets}</p>
+                        <p style="margin:4px 0 0 0; color:#475569; font-size:12px;">⚖️ ${prototype.rules}</p></div>`;
                 }
-                content += `<button onclick="getDirections({lat:${place.geometry.location.lat()}, lng:${place.geometry.location.lng()}})" style="background:#ec4899;color:white;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer;font-weight:bold;">Walk Here</button></div>`;
+                content += `<button onclick="getDirections({lat:${place.geometry.location.lat()}, lng:${place.geometry.location.lng()}})" style="background:#ec4899;color:white;border:none;padding:12px 14px;width:100%;border-radius:10px;margin-top:12px;cursor:pointer;font-weight:800;font-size:14px;">Walk Here</button></div>`;
                 infowindow.setContent(content);
                 infowindow.open(map, marker);
             });
@@ -382,7 +375,6 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 v.srcObject = stream; v.classList.remove('hidden'); s.classList.remove('hidden');
-<<<<<<< HEAD
                 const scanBtn = document.getElementById('scan-face-btn');
                 if (document.getElementById('face-icon')) document.getElementById('face-icon').classList.add('hidden');
                 setTimeout(() => { s.classList.add('hidden'); if(scanBtn){ scanBtn.innerText = "Linked Successfully"; scanBtn.classList.remove('bg-pink-600'); scanBtn.classList.add('bg-green-600'); } }, 3000);
@@ -547,10 +539,6 @@
             if(!m) return;
             m.classList.remove('hidden');
             setTimeout(()=>{ m.classList.add('hidden'); }, 2200);
-=======
-                setTimeout(() => { s.classList.add('hidden'); const btn = document.getElementById('scan-face-btn'); btn.innerText = "Linked"; btn.className = "w-full bg-green-600 py-2 rounded-xl font-bold text-sm"; }, 3000);
-            } catch (err) { alert("Camera required."); }
->>>>>>> c3e525bd320c83b3832d32602c6be9c0481fb947
         }
 
         function logoutUser(){ localStorage.clear(); location.reload(); }
