@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomePath | Precision Search</title>
+    <title>HomePath | Safe Haven Lock</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -11,11 +11,12 @@
         .app-container { width: 100%; height: 100vh; background: rgba(45, 27, 78, 0.6); display: flex; flex-direction: column; position: relative; overflow: hidden; }
         @media (min-width: 768px) { .app-container { width: 375px; height: 812px; border: 12px solid #111; border-radius: 45px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); } }
         .glass-card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .field-value { background: rgba(61, 43, 110, 0.5); border: 1px solid rgba(139, 92, 246, 0.2); }
         .hidden { display: none; }
         #google-map { width: 100%; height: 100%; border-radius: 24px; }
         .pulse-ring { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
+        .scan-line { position: absolute; width: 100%; height: 2px; background: #ec4899; top: 0; animation: scan 2s linear infinite; box-shadow: 0 0 15px #ec4899; z-index: 10; }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
 <body>
@@ -40,89 +41,123 @@
                         <span class="text-[9px] uppercase font-bold opacity-70">Tap to Speak</span>
                     </button>
                 </div>
-                <p id="status-text" class="text-xs mt-4 opacity-70 italic text-center px-4">"Find a shelter near me"</p>
+                <p id="status-text" class="text-xs mt-4 opacity-70 italic text-center px-4">"Search is locked to your location."</p>
             </div>
 
             <div class="relative mb-6">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 opacity-40"></i>
-                <input type="text" id="searchInput" placeholder="Search..." 
+                <input type="text" id="searchInput" placeholder="Find food, beds, or help..." 
                        class="w-full bg-white/10 border border-white/20 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mb-20">
+                <div onclick="handleSearch('Pet friendly')" class="glass-card p-4 rounded-3xl flex flex-col gap-2 cursor-pointer hover:bg-white/10">
+                    <i class="fas fa-paw text-orange-400"></i>
+                    <span class="text-xs font-bold">Pet Friendly</span>
+                </div>
+                <div onclick="handleSearch('Soup kitchen')" class="glass-card p-4 rounded-3xl flex flex-col gap-2 cursor-pointer hover:bg-white/10">
+                    <i class="fas fa-utensils text-yellow-400"></i>
+                    <span class="text-xs font-bold">Hot Meals</span>
+                </div>
             </div>
         </div>
 
         <div id="map-screen" class="screen hidden h-full flex flex-col">
-            <h2 class="text-xl font-bold mb-4">Nearby Resources</h2>
-            <div class="flex-1 mb-24 glass-card rounded-[32px] overflow-hidden"><div id="google-map"></div></div>
+            <h2 class="text-xl font-bold mb-4">Nearest Shelters</h2>
+            <div class="flex-1 mb-24 glass-card rounded-[32px] overflow-hidden relative">
+                <div id="google-map"></div>
+                <button onclick="recenterMap()" class="absolute top-4 right-4 w-10 h-10 bg-white text-pink-600 rounded-full flex items-center justify-center shadow-lg z-10">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <div id="directions-panel" class="absolute bottom-4 left-4 right-4 glass-card p-3 rounded-2xl">
+                    <p id="route-info" class="text-xs font-bold text-pink-400">Searching for closest path...</p>
+                </div>
+            </div>
         </div>
 
         <div id="profile-screen" class="screen hidden h-full flex flex-col">
-            <h2 class="text-xl font-bold mb-4">Account Security</h2>
-            
-            <div id="face-auth-box" class="glass-card w-full h-64 rounded-3xl mb-6 relative overflow-hidden flex items-center justify-center">
-                <div id="face-placeholder" class="text-center">
-                    <i class="fas fa-user-circle text-6xl opacity-20 mb-3"></i>
-                    <p class="text-xs opacity-50">Face ID Identity Required</p>
-                </div>
-                <video id="face-video" class="hidden" autoplay playsinline></video>
+            <h2 class="text-xl font-bold mb-4">Identity Verification</h2>
+            <div id="face-box" class="glass-card w-full h-64 rounded-3xl mb-6 relative overflow-hidden flex items-center justify-center bg-black/30">
+                <video id="face-video" class="hidden" autoplay playsinline style="width:100%; height:100%; object-fit:cover; transform: scaleX(-1);"></video>
                 <div id="scanner" class="hidden scan-line"></div>
+                <i id="face-icon" class="fas fa-user-shield text-6xl opacity-20"></i>
             </div>
-
-            <button id="auth-btn" onclick="startFaceScan()" class="w-full bg-pink-600 py-4 rounded-2xl font-bold mb-8 hover:bg-pink-700 transition-all">Start Face ID Scan</button>
-
-            <div class="space-y-3">
-                <div class="glass-card p-4 rounded-2xl flex justify-between items-center"><span class="text-xs font-medium">Dark Mode</span><div class="w-10 h-5 bg-pink-500 rounded-full relative"><div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div></div>
-                <div class="glass-card p-4 rounded-2xl flex justify-between items-center"><span class="text-xs font-medium">Text to Speech</span><i class="fas fa-chevron-right opacity-30 text-xs"></i></div>
-                <div class="glass-card p-4 rounded-2xl flex justify-between items-center text-red-400"><span class="text-xs font-medium">Emergency Exit</span><i class="fas fa-sign-out-alt"></i></div>
-            </div>
+            <button id="auth-btn" onclick="startFaceScan()" class="w-full bg-pink-600 py-4 rounded-2xl font-bold">Verify Identity</button>
         </div>
 
         <div class="absolute bottom-8 left-6 right-6 glass-card rounded-[28px] p-2 flex justify-around items-center">
             <button onclick="showScreen('home-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-search"></i></button>
             <button onclick="showScreen('map-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-map-marker-alt"></i></button>
+            <button onclick="showScreen('profile-screen')" class="w-12 h-12 flex items-center justify-center"><i class="fas fa-user"></i></button>
         </div>
     </div>
 
     <script>
-        let map, service, infowindow;
+        let map, service, infowindow, directionsService, directionsRenderer, userPos;
+        let markers = [];
 
         function initMap() {
+            userPos = {lat: 43.2557, lng: -79.8711}; // Start in Hamilton
             map = new google.maps.Map(document.getElementById("google-map"), {
-                zoom: 14, center: {lat: 43.2557, lng: -79.8711}, disableDefaultUI: true,
-                styles: [{ "featureType": "all", "elementType": "labels.text.fill", "stylers": [{ "color": "#ffffff" }] }, { "featureType": "landscape", "stylers": [{ "color": "#2d1b4e" }] }]
+                zoom: 15, center: userPos, disableDefaultUI: true,
+                styles: [{ "featureType": "poi.business", "stylers": [{ "visibility": "off" }] }, { "featureType": "landscape", "stylers": [{ "color": "#2d1b4e" }] }]
             });
             directionsService = new google.maps.DirectionsService();
             directionsRenderer = new google.maps.DirectionsRenderer({ map: map, polylineOptions: { strokeColor: "#ec4899", strokeWeight: 6 } });
             infowindow = new google.maps.InfoWindow();
-        }
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            if(id === 'map-screen') google.maps.event.trigger(map, 'resize');
-        }
-
-        // --- SEARCH BAR LOGIC ---
-        document.getElementById('searchInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                showScreen('map-screen');
-                performSearch(this.value);
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    recenterMap();
+                });
             }
-        });
+        }
 
-        function performSearch(query, useGPS) {
+        function recenterMap() {
+            if(userPos) {
+                map.setCenter(userPos);
+                new google.maps.Marker({ position: userPos, map: map, icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' });
+            }
+        }
+
+        function handleSearch(val) {
+            const input = val.toLowerCase();
+            // EXTENDED SAFETY FILTER
+            const blocked = ["weed", "drug", "alcohol", "sex", "adult", "party", "club", "bar", "strip"];
+            if (blocked.some(w => input.includes(w))) {
+                document.getElementById('status-text').innerText = "Safe search active. Finding housing.";
+                performSearch("Homeless Shelter");
+                return;
+            }
+
+            showScreen('map-screen');
+            performSearch(val + " Homeless Shelter");
+        }
+
+        function performSearch(query) {
             const request = {
-                // If useGPS is true, use your actual location. Otherwise, use map view.
-                location: (useGPS && userPos) ? userPos : map.getCenter(),
-                radius: '5000',
-                query: query
+                location: userPos,
+                rankBy: google.maps.places.RankBy.DISTANCE,
+                keyword: query
             };
 
             service = new google.maps.places.PlacesService(map);
-            service.textSearch(request, (results, status) => {
+            service.nearbySearch(request, (results, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
                     clearMarkers();
                     results.forEach(createMarker);
-                    map.setCenter(results[0].geometry.location);
+                    // Automatically get directions to the VERY NEAREST one found
+                    getDirections(results[0].geometry.location);
+                }
+            });
+        }
+
+        function getDirections(dest) {
+            directionsService.route({ origin: userPos, destination: dest, travelMode: 'WALKING' }, (result, status) => {
+                if (status == 'OK') {
+                    directionsRenderer.setDirections(result);
+                    document.getElementById('route-info').innerText = "Walk to nearest: " + result.routes[0].legs[0].duration.text;
                 }
             });
         }
@@ -136,201 +171,30 @@
             });
         }
 
-        // --- LOGIN FACE ID LOGIC ---
-        async function startLoginFaceScan() {
-            const tempContainer = document.createElement('div');
-            tempContainer.innerHTML = `
-                <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div class="bg-gradient-to-b from-purple-900 to-black p-6 rounded-3xl text-center max-w-sm w-80">
-                        <h3 class="text-xl font-bold mb-4">Face ID Authentication</h3>
-                        <div class="glass-card w-full h-40 rounded-3xl mb-4 relative overflow-hidden flex items-center justify-center">
-                            <div id="login-face-placeholder" class="text-center">
-                                <i class="fas fa-user-circle text-5xl opacity-20 mb-2"></i>
-                                <p class="text-xs opacity-50">Initializing camera...</p>
-                            </div>
-                            <video id="login-face-video" class="hidden" autoplay playsinline></video>
-                            <div id="login-scanner" class="hidden scan-line"></div>
-                        </div>
-                        <p id="login-status" class="text-sm opacity-70 mb-4">Scanning...</p>
-                        <button onclick="cancelFaceScan()" class="w-full bg-white/6 py-2 rounded-2xl font-bold text-xs hover:bg-white/10">Cancel</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(tempContainer);
-            
-            const video = document.getElementById('login-face-video');
-            const placeholder = document.getElementById('login-face-placeholder');
-            const scanner = document.getElementById('login-scanner');
-            const statusText = document.getElementById('login-status');
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-                video.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-                scanner.classList.remove('hidden');
-                statusText.innerText = 'Scanning facial geometry...';
-
-                setTimeout(() => {
-                    scanner.classList.add('hidden');
-                    statusText.innerText = 'Identity verified!';
-                    stream.getTracks().forEach(track => track.stop());
-                    
-                    setTimeout(() => {
-                        isAuthenticated = true;
-                        document.getElementById('loginUserId').value = '';
-                        document.getElementById('loginPassword').value = '';
-                        tempContainer.remove();
-                        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-                        document.getElementById('profile-screen').classList.remove('hidden');
-                        loadProfile();
-                    }, 1000);
-                }, 3000);
-            } catch (err) {
-                statusText.innerText = 'Camera access denied';
-                setTimeout(() => cancelFaceScan(), 2000);
-            }
-        }
-
-        function cancelFaceScan() {
-            const modal = document.querySelector('.fixed.inset-0');
-            if (modal) modal.parentElement.remove();
-            const video = document.getElementById('login-face-video');
-            if (video && video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
-            }
-        }
-
-        // --- FACE ID LOGIC ---
-        async function startFaceScan() {
-            const video = document.getElementById('face-video');
-            const placeholder = document.getElementById('face-placeholder');
-            const scanner = document.getElementById('scanner');
-            const btn = document.getElementById('auth-btn');
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-                video.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-                scanner.classList.remove('hidden');
-                btn.innerText = "Scanning Geometry...";
-
-                setTimeout(() => {
-                    scanner.classList.add('hidden');
-                    btn.innerText = "Identity Verified";
-                    btn.classList.replace('bg-pink-600', 'bg-green-600');
-                    alert("Welcome back. Your facial profile matches HomePath ID: #8821");
-                }, 3000);
-            } catch (err) {
-                alert("Camera access denied. Please allow camera for Face ID demo.");
-            }
-        }
+        function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
+        function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
 
         function startVoice() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return alert("Mic not supported.");
+            if (!SpeechRecognition) return;
             const recognition = new SpeechRecognition();
-            recognition.onstart = () => { document.getElementById('voice-pulse').classList.remove('hidden'); };
-            recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                document.getElementById('searchInput').value = text;
-                handleSearch(text);
+            recognition.onstart = () => document.getElementById('voice-pulse').classList.remove('hidden');
+            recognition.onresult = (e) => {
+                handleSearch(e.results[0][0].transcript);
                 document.getElementById('voice-pulse').classList.add('hidden');
             };
             recognition.start();
         }
 
-        // --- PROFILE DATA PERSISTENCE ---
-        function saveProfile() {
-            const profile = {
-                userId: document.getElementById('userIdInput').value || 'HP-' + Date.now().toString(36).toUpperCase(),
-                name: document.getElementById('nameInput').value || '',
-                password: document.getElementById('passwordInput').value || '',
-                phone: document.getElementById('phoneInput').value || '',
-                age: parseInt(document.getElementById('ageInput').value) || null,
-                gender: document.getElementById('genderSelect').value || '',
-                location: document.getElementById('locationInput').value || '',
-                habits: {
-                    smoking: document.getElementById('smokingChk').checked,
-                    drinking: document.getElementById('drinkingChk').checked
-                },
-                pets: {
-                    hasDog: document.getElementById('petDog').checked,
-                    hasCat: document.getElementById('petCat').checked,
-                    hasOther: document.getElementById('petOther').checked
-                },
-                dependents: parseInt(document.getElementById('dependentsInput').value) || 0,
-                facialData: document.getElementById('facialDataDisplay').innerText
-            };
+        async function startFaceScan() {
+            const v = document.getElementById('face-video');
+            const s = document.getElementById('scanner');
             try {
-                localStorage.setItem('homepath_profile', JSON.stringify(profile));
-                if (!document.getElementById('userIdInput').value) {
-                    document.getElementById('userIdInput').value = profile.userId;
-                }
-                alert('Profile saved locally');
-            } catch (e) {
-                alert('Failed to save profile: ' + e.message);
-            }
-        }
-
-        function loadProfile() {
-            try {
-                const raw = localStorage.getItem('homepath_profile');
-                if (!raw) return;
-                const profile = JSON.parse(raw);
-                document.getElementById('userIdInput').value = profile.userId || '';
-                document.getElementById('nameInput').value = profile.name || '';
-                document.getElementById('passwordInput').value = profile.password || '';
-                document.getElementById('phoneInput').value = profile.phone || '';
-                document.getElementById('ageInput').value = profile.age || '';
-                document.getElementById('genderSelect').value = profile.gender || '';
-                document.getElementById('locationInput').value = profile.location || '';
-                document.getElementById('smokingChk').checked = profile.habits ? !!profile.habits.smoking : false;
-                document.getElementById('drinkingChk').checked = profile.habits ? !!profile.habits.drinking : false;
-                document.getElementById('petDog').checked = profile.pets ? !!profile.pets.hasDog : false;
-                document.getElementById('petCat').checked = profile.pets ? !!profile.pets.hasCat : false;
-                document.getElementById('petOther').checked = profile.pets ? !!profile.pets.hasOther : false;
-                document.getElementById('dependentsInput').value = profile.dependents || 0;
-                document.getElementById('facialDataDisplay').innerText = profile.facialData || 'Not scanned';
-            } catch (e) {
-                console.error('Failed to load profile', e);
-            }
-        }
-
-        function exportProfile() {
-            try {
-                const raw = localStorage.getItem('homepath_profile') || '{}';
-                const blob = new Blob([raw], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'homepath_profile.json';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                URL.revokeObjectURL(url);
-            } catch (e) {
-                alert('Export failed: ' + e.message);
-            }
-        }
-
-        function handleImport(event) {
-            const file = event.target.files && event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    localStorage.setItem('homepath_profile', JSON.stringify(parsed));
-                    loadProfile();
-                    alert('Profile imported');
-                } catch (err) {
-                    alert('Invalid JSON file');
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                v.srcObject = stream; v.classList.remove('hidden'); s.classList.remove('hidden');
+                document.getElementById('face-icon').classList.add('hidden');
+                setTimeout(() => { s.classList.add('hidden'); document.getElementById('auth-btn').innerText = "Linked Successfully"; document.getElementById('auth-btn').classList.add('bg-green-600'); }, 3000);
+            } catch (err) { alert("Camera needed."); }
         }
 
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(e.target.value); });
