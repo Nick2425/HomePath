@@ -1,0 +1,21 @@
+{
+    "password": "makpak",
+    "facial_data": null,
+    "user_id": "4mm4rkhan",
+    "pets": [
+        "dog",
+        "cat"
+    ],
+    "personal_info": {
+        "name": "Muhammad Ammar Khan",
+        "phone_number": "6472690701",
+        "can_be_found_at": "mcmaster",
+        "age": "20",
+        "sex_at_birth": "male",
+        "dependents": 0
+    },
+    "habits": {
+        "smoking": "non-smoker",
+        "drinking": "non-drinker"
+    }
+}
