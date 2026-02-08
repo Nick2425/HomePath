@@ -189,90 +189,88 @@
     </div>
 
     <script>
-                        async function createAccount() {
-                            const userId = document.getElementById('createUserId').value.trim();
-                            const password = document.getElementById('createPassword').value;
-                            const msgEl = document.getElementById('loginMessage');
-                            if (!userId || !password) {
-                                msgEl.innerText = 'Enter User ID and password';
-                                return;
+        async function createAccount() {
+            const userId = document.getElementById('createUserId').value.trim();
+            const password = document.getElementById('createPassword').value;
+            const msgEl = document.getElementById('loginMessage');
+            if (!userId || !password) {
+                msgEl.innerText = 'Enter User ID and password';
+                return;
+            }
+            const data = {
+                userId: userId,
+                password: password,
+                age: '',
+                gender: '',
+                smoking_habit: '',
+                drinking_habit: '',
+                pets: [],
+                dependents: '',
+                name: '',
+                phone: '',
+                location: '',
+                facialData: ''
+            };
+            try {
+                const res = await fetch('/save-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const body = await res.json();
+                if (body.success) {
+                    msgEl.innerText = 'Account created! Logging you in...';
+                    fetch('/load-profile/' + encodeURIComponent(userId))
+                        .then(res => res.json())
+                        .then(profile => {
+                            if(profile.success && profile.data.password === password) {
+                                enterAuthenticated(profile.data);
+                            } else {
+                                msgEl.innerText = 'Account created, but failed to load profile.';
                             }
-                            const data = {
-                                userId: userId,
-                                password: password,
-                                age: '',
-                                gender: '',
-                                smoking_habit: '',
-                                drinking_habit: '',
-                                pets: [],
-                                dependents: '',
-                                name: '',
-                                phone: '',
-                                location: '',
-                                facialData: ''
-                            };
-                            try {
-                                const res = await fetch('/save-profile', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify(data)
-                                });
-                                const body = await res.json();
-                                if (body.success) {
-                                    msgEl.innerText = 'Account created! Logging you in...';
-                                    // Always try to fetch and load profile
-                                    fetch('/load-profile/' + encodeURIComponent(userId))
-                                        .then(res => res.json())
-                                        .then(profile => {
-                                            if(profile.success && profile.data.password === password) {
-                                                enterAuthenticated(profile.data);
-                                            } else {
-                                                msgEl.innerText = 'Account created, but failed to load profile.';
-                                            }
-                                        })
-                                        .catch(() => {
-                                            msgEl.innerText = 'Account created, but server error loading profile.';
-                                        });
-                                } else {
-                                    msgEl.innerText = 'Account creation failed.';
-                                }
-                            } catch (e) {
-                                msgEl.innerText = 'Server error.';
-                            }
-                        }
+                        })
+                        .catch(() => {
+                            msgEl.innerText = 'Account created, but server error loading profile.';
+                        });
+                } else {
+                    msgEl.innerText = 'Account creation failed.';
+                }
+            } catch (e) {
+                msgEl.innerText = 'Server error.';
+            }
+        }
 
-                function enterAuthenticated(profileData){
-                    localStorage.setItem('homepath_authenticated','true');
-                    // Persist profile so fields stay populated across navigation/reload
-                    try {
-                        localStorage.setItem('homepath_current_user_id', profileData && profileData.user_id ? profileData.user_id : '');
-                        localStorage.setItem('homepath_profile', JSON.stringify(profileData || {}));
-                    } catch (e) {}
-                    // Hide welcome modal permanently once authenticated
-                    closeWelcomeModal();
-                    populateSettingsFromData(profileData);
-                    showScreen('settings-screen');
-                }
+        function enterAuthenticated(profileData){
+            localStorage.setItem('homepath_authenticated','true');
+            try {
+                localStorage.setItem('homepath_current_user_id', profileData && profileData.user_id ? profileData.user_id : '');
+                localStorage.setItem('homepath_profile', JSON.stringify(profileData || {}));
+            } catch (e) {}
+            closeWelcomeModal();
+            populateSettingsFromData(profileData);
+            showScreen('settings-screen');
+        }
 
-                function loadProfileFromStorage(){
-                    try {
-                        const raw = localStorage.getItem('homepath_profile');
-                        if (!raw) return null;
-                        const parsed = JSON.parse(raw);
-                        return parsed && typeof parsed === 'object' ? parsed : null;
-                    } catch (e) {
-                        return null;
-                    }
-                }
+        function loadProfileFromStorage(){
+            try {
+                const raw = localStorage.getItem('homepath_profile');
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return parsed && typeof parsed === 'object' ? parsed : null;
+            } catch (e) {
+                return null;
+            }
+        }
 
-                function closeWelcomeModal() {
-                    document.getElementById('welcomeModal').classList.add('hidden');
-                    localStorage.setItem('homepath_welcome_hidden', 'true');
-                }
-                function continueAsGuest() {
-                    closeWelcomeModal();
-                    showScreen('home-screen');
-                }
+        function closeWelcomeModal() {
+            document.getElementById('welcomeModal').classList.add('hidden');
+            localStorage.setItem('homepath_welcome_hidden', 'true');
+        }
+        function continueAsGuest() {
+            closeWelcomeModal();
+            showScreen('home-screen');
+        }
+
         const PROTOTYPE_DATA = {
             "Barton-Tiffany Temporary Shelter": { beds: 5, pets: "Yes", rules: "Low-barrier", addr: "250 Hess St N" },
             "Mary's Place": { beds: 2, pets: "Service animals only", rules: "Alcohol-free", addr: "20 Pearl St N" },
@@ -308,14 +306,35 @@
             }
         }
 
-        function handleSearch(val) {
+        // --- GEMINI AI IMPLEMENTATION ---
+        async function handleSearch(val) {
             if (!val) return;
-            showScreen('map-screen');
-            performSearch(val.includes("Shelter") ? val : val + " Homeless Shelter");
+            document.getElementById('status-text').innerText = "Gemini AI is analyzing your request...";
+            
+            try {
+                // We send the user's natural language input to Gemini via your backend
+                const response = await fetch('/gemini-search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: val })
+                });
+                const data = await response.json();
+                
+                // If Gemini suggests a better search term (e.g. "I'm hungry" -> "Soup Kitchen"), we use it
+                const finalQuery = data.optimizedQuery || val;
+                
+                showScreen('map-screen');
+                performSearch(finalQuery.includes("Shelter") ? finalQuery : finalQuery + " Homeless Shelter");
+            } catch (e) {
+                // Fallback to normal search if Gemini fails
+                showScreen('map-screen');
+                performSearch(val.includes("Shelter") ? val : val + " Homeless Shelter");
+            } finally {
+                document.getElementById('status-text').innerText = "Search results updated.";
+            }
         }
 
         function performSearch(query) {
-            // UPDATED: Use textSearch so it's not locked to Hamilton. First result centers the map.
             const request = { query: query };
             service = new google.maps.places.PlacesService(map);
             service.textSearch(request, (results, status) => {
@@ -338,7 +357,6 @@
                     break;
                 }
             }
-            // Generate defaults if no prototype found
             const info = prototype || {
                 beds: Math.floor(Math.random() * 8) + 1,
                 pets: Math.random() > 0.5 ? "Yes" : "Check locally",
@@ -384,7 +402,6 @@
             recognition.start();
         }
 
-        // --- ALL YOUR AUTH/PROFILE LOGIC PRESERVED ---
         async function loginUser(){
             const userId = document.getElementById('loginUserId').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -424,7 +441,6 @@
             fetch('/save-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
             .then(res => res.json()).then(res => {
                 if (res.success) {
-                    // Keep local storage in sync so fields don't appear cleared later
                     const profileForUi = {
                         user_id: data.user_id,
                         password: data.password,
@@ -456,7 +472,6 @@
         }
 
         function populateSettingsFromData(d){
-            // Always fill all fields, even if personal_info or habits are missing
             document.getElementById('name').value = d.personal_info && d.personal_info.name ? d.personal_info.name : '';
             document.getElementById('phone').value = d.personal_info && d.personal_info.phone_number ? d.personal_info.phone_number : '';
             document.getElementById('location').value = d.personal_info && d.personal_info.can_be_found_at ? d.personal_info.can_be_found_at : '';
@@ -467,7 +482,6 @@
             document.getElementById('password').value = d.password || '';
             document.getElementById('smoking').value = d.habits && d.habits.smoking ? d.habits.smoking : '';
             document.getElementById('drinking').value = d.habits && d.habits.drinking ? d.habits.drinking : '';
-            // Pets checkboxes
             document.getElementById('pet_dog').checked = d.pets && d.pets.includes('dog');
             document.getElementById('pet_cat').checked = d.pets && d.pets.includes('cat');
             document.getElementById('pet_other').checked = d.pets && d.pets.includes('other');
@@ -492,7 +506,7 @@
         function showSettingsScreen(){
             if(localStorage.getItem('homepath_authenticated') === 'true') {
                 const stored = loadProfileFromStorage();
-                if (stored) populateSettingsFromData(stored);
+                if(stored) populateSettingsFromData(stored);
                 showScreen('settings-screen');
             } else {
                 showScreen('login-screen');
@@ -503,22 +517,12 @@
         function showSaveModal(){ document.getElementById('saveModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('saveModal').classList.add('hidden'), 2200); }
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(e.target.value); });
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }, 1000);
+        
         window.addEventListener('DOMContentLoaded', () => {
-            const authed = localStorage.getItem('homepath_authenticated') === 'true';
-            const welcomeHidden = localStorage.getItem('homepath_welcome_hidden') === 'true';
-
-            if (authed) {
-                document.getElementById('welcomeModal').classList.add('hidden');
-                const stored = loadProfileFromStorage();
-                if (stored) populateSettingsFromData(stored);
-                showScreen('settings-screen');
+            if (!localStorage.getItem('homepath_welcome_hidden')) {
+                document.getElementById('welcomeModal').classList.remove('hidden');
             } else {
                 showScreen('home-screen');
-                if (welcomeHidden) {
-                    document.getElementById('welcomeModal').classList.add('hidden');
-                } else {
-                    document.getElementById('welcomeModal').classList.remove('hidden');
-                }
             }
         });
     </script>
