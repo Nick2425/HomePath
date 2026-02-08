@@ -25,6 +25,18 @@
     </style>
 </head>
 <body>
+    <div id="welcomeModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-[200]">
+        <div class="bg-white text-gray-900 rounded-3xl p-8 w-80 text-center shadow-2xl">
+            <div class="text-3xl text-purple-500 mb-2"><i class="fas fa-user-circle"></i></div>
+            <div class="font-bold text-lg mb-3">Welcome to HomePath</div>
+            <div class="text-sm text-gray-600 mb-6">Please choose how you want to continue:</div>
+            <div class="flex flex-col gap-3">
+                <button onclick="continueAsGuest()" class="bg-pink-600 text-white py-2 rounded-xl font-bold text-sm shadow-lg">Continue as Guest</button>
+                <button onclick="showScreen('login-screen'); closeWelcomeModal();" class="bg-purple-700 text-white py-2 rounded-xl font-bold text-sm shadow-lg">Log In</button>
+                <button onclick="closeWelcomeModal(); showScreen('login-screen');" class="bg-white border border-pink-600 text-pink-600 py-2 rounded-xl font-bold text-sm shadow-lg w-full">Create Account</button>
+            </div>
+        </div>
+    </div>
 
     <div class="app-container p-6">
         <div class="flex justify-between items-center mb-4 pt-2">
@@ -93,12 +105,22 @@
                     <label class="block text-xs font-bold text-gray-300 mb-2">Password</label>
                     <input id="loginPassword" type="password" placeholder="Enter password" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="loginUser()" class="flex-1 bg-purple-700 py-3 rounded-xl font-bold">Log in</button>
+                <button onclick="loginUser()" class="w-full bg-purple-700 py-3 rounded-xl font-bold mb-3">Log in</button>
+                <div class="flex items-center my-6">
+                    <hr class="flex-grow border-t border-gray-300">
+                    <span class="mx-4 text-xs font-bold text-gray-400">OR Create Account</span>
+                    <hr class="flex-grow border-t border-gray-300">
                 </div>
-                <div class="flex items-center justify-between mt-3">
-                    <div id="loginMessage" class="text-sm text-yellow-300" style="min-height:1.2rem"></div>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-300 mb-2">User ID</label>
+                    <input id="createUserId" type="text" placeholder="Choose User ID" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
                 </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-300 mb-2">Password</label>
+                    <input id="createPassword" type="password" placeholder="Choose password" class="w-full bg-white/10 border border-white/20 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500">
+                </div>
+                <button onclick="createAccount()" class="w-full bg-pink-600 py-3 rounded-xl font-bold text-white">Create Account</button>
+                <div id="loginMessage" class="text-sm text-yellow-300 mt-3" style="min-height:1.2rem"></div>
             </div>
         </div>
 
@@ -167,6 +189,90 @@
     </div>
 
     <script>
+                        async function createAccount() {
+                            const userId = document.getElementById('createUserId').value.trim();
+                            const password = document.getElementById('createPassword').value;
+                            const msgEl = document.getElementById('loginMessage');
+                            if (!userId || !password) {
+                                msgEl.innerText = 'Enter User ID and password';
+                                return;
+                            }
+                            const data = {
+                                userId: userId,
+                                password: password,
+                                age: '',
+                                gender: '',
+                                smoking_habit: '',
+                                drinking_habit: '',
+                                pets: [],
+                                dependents: '',
+                                name: '',
+                                phone: '',
+                                location: '',
+                                facialData: ''
+                            };
+                            try {
+                                const res = await fetch('http://localhost:5000/save-profile', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(data)
+                                });
+                                const body = await res.json();
+                                if (body.success) {
+                                    msgEl.innerText = 'Account created! Logging you in...';
+                                    // Always try to fetch and load profile
+                                    fetch('http://localhost:5000/load-profile/' + encodeURIComponent(userId))
+                                        .then(res => res.json())
+                                        .then(profile => {
+                                            if(profile.success && profile.data.password === password) {
+                                                enterAuthenticated(profile.data);
+                                            } else {
+                                                msgEl.innerText = 'Account created, but failed to load profile.';
+                                            }
+                                        })
+                                        .catch(() => {
+                                            msgEl.innerText = 'Account created, but server error loading profile.';
+                                        });
+                                } else {
+                                    msgEl.innerText = 'Account creation failed.';
+                                }
+                            } catch (e) {
+                                msgEl.innerText = 'Server error.';
+                            }
+                        }
+
+                function enterAuthenticated(profileData){
+                    localStorage.setItem('homepath_authenticated','true');
+                    // Persist profile so fields stay populated across navigation/reload
+                    try {
+                        localStorage.setItem('homepath_current_user_id', profileData && profileData.user_id ? profileData.user_id : '');
+                        localStorage.setItem('homepath_profile', JSON.stringify(profileData || {}));
+                    } catch (e) {}
+                    // Hide welcome modal permanently once authenticated
+                    closeWelcomeModal();
+                    populateSettingsFromData(profileData);
+                    showScreen('settings-screen');
+                }
+
+                function loadProfileFromStorage(){
+                    try {
+                        const raw = localStorage.getItem('homepath_profile');
+                        if (!raw) return null;
+                        const parsed = JSON.parse(raw);
+                        return parsed && typeof parsed === 'object' ? parsed : null;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                function closeWelcomeModal() {
+                    document.getElementById('welcomeModal').classList.add('hidden');
+                    localStorage.setItem('homepath_welcome_hidden', 'true');
+                }
+                function continueAsGuest() {
+                    closeWelcomeModal();
+                    showScreen('home-screen');
+                }
         const PROTOTYPE_DATA = {
             "Barton-Tiffany Temporary Shelter": { beds: 5, pets: "Yes", rules: "Low-barrier", addr: "250 Hess St N" },
             "Mary's Place": { beds: 2, pets: "Service animals only", rules: "Alcohol-free", addr: "20 Pearl St N" },
@@ -288,9 +394,7 @@
                 const res = await fetch('http://localhost:5000/load-profile/' + encodeURIComponent(userId));
                 const body = await res.json();
                 if(body.success && body.data.password === password) {
-                    populateSettingsFromData(body.data);
-                    localStorage.setItem('homepath_authenticated','true');
-                    showScreen('settings-screen');
+                    enterAuthenticated(body.data);
                 } else { msgEl.innerText = 'Invalid login'; }
             } catch(e) { msgEl.innerText = 'Server error'; }
         }
@@ -318,24 +422,55 @@
                 }
             };
             fetch('http://localhost:5000/save-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-            .then(res => res.json()).then(res => { if (res.success) showSaveModal(); });
+            .then(res => res.json()).then(res => {
+                if (res.success) {
+                    // Keep local storage in sync so fields don't appear cleared later
+                    const profileForUi = {
+                        user_id: data.user_id,
+                        password: data.password,
+                        personal_info: {
+                            name: data.name,
+                            phone_number: data.personal_info.phone_number,
+                            can_be_found_at: data.personal_info.can_be_found_at,
+                            age: data.personal_info.age,
+                            sex_at_birth: data.personal_info.sex_at_birth,
+                            dependents: data.personal_info.dependents
+                        },
+                        habits: {
+                            smoking: data.habits.smoking,
+                            drinking: data.habits.drinking
+                        },
+                        pets: [
+                            data.pets.dog ? 'dog' : null,
+                            data.pets.cat ? 'cat' : null,
+                            data.pets.other ? 'other' : null
+                        ].filter(Boolean)
+                    };
+                    try {
+                        localStorage.setItem('homepath_current_user_id', profileForUi.user_id || '');
+                        localStorage.setItem('homepath_profile', JSON.stringify(profileForUi));
+                    } catch (e) {}
+                    showSaveModal();
+                }
+            });
         }
 
         function populateSettingsFromData(d){
-            if(d.personal_info){
-                document.getElementById('name').value = d.personal_info.name || '';
-                document.getElementById('phone').value = d.personal_info.phone_number || '';
-                document.getElementById('location').value = d.personal_info.can_be_found_at || '';
-                document.getElementById('age').value = d.personal_info.age || '';
-                document.getElementById('gender').value = d.personal_info.sex_at_birth || '';
-                document.getElementById('dependents').value = d.personal_info.dependents || '';
-            }
+            // Always fill all fields, even if personal_info or habits are missing
+            document.getElementById('name').value = d.personal_info && d.personal_info.name ? d.personal_info.name : '';
+            document.getElementById('phone').value = d.personal_info && d.personal_info.phone_number ? d.personal_info.phone_number : '';
+            document.getElementById('location').value = d.personal_info && d.personal_info.can_be_found_at ? d.personal_info.can_be_found_at : '';
+            document.getElementById('age').value = d.personal_info && d.personal_info.age ? d.personal_info.age : '';
+            document.getElementById('gender').value = d.personal_info && d.personal_info.sex_at_birth ? d.personal_info.sex_at_birth : '';
+            document.getElementById('dependents').value = d.personal_info && d.personal_info.dependents ? d.personal_info.dependents : '';
             document.getElementById('userid').value = d.user_id || '';
             document.getElementById('password').value = d.password || '';
-            if(d.habits){
-                document.getElementById('smoking').value = d.habits.smoking || '';
-                document.getElementById('drinking').value = d.habits.drinking || '';
-            }
+            document.getElementById('smoking').value = d.habits && d.habits.smoking ? d.habits.smoking : '';
+            document.getElementById('drinking').value = d.habits && d.habits.drinking ? d.habits.drinking : '';
+            // Pets checkboxes
+            document.getElementById('pet_dog').checked = d.pets && d.pets.includes('dog');
+            document.getElementById('pet_cat').checked = d.pets && d.pets.includes('cat');
+            document.getElementById('pet_other').checked = d.pets && d.pets.includes('other');
         }
 
         async function startFaceScan() {
@@ -354,13 +489,38 @@
         }
 
         function logoutUser(){ localStorage.clear(); location.reload(); }
-        function showSettingsScreen(){ if(localStorage.getItem('homepath_authenticated') === 'true') showScreen('settings-screen'); else showScreen('login-screen'); }
+        function showSettingsScreen(){
+            if(localStorage.getItem('homepath_authenticated') === 'true') {
+                const stored = loadProfileFromStorage();
+                if (stored) populateSettingsFromData(stored);
+                showScreen('settings-screen');
+            } else {
+                showScreen('login-screen');
+            }
+        }
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
         function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
         function showSaveModal(){ document.getElementById('saveModal').classList.remove('hidden'); setTimeout(()=>document.getElementById('saveModal').classList.add('hidden'), 2200); }
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(e.target.value); });
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }, 1000);
-        window.addEventListener('DOMContentLoaded', () => showScreen('home-screen'));
+        window.addEventListener('DOMContentLoaded', () => {
+            const authed = localStorage.getItem('homepath_authenticated') === 'true';
+            const welcomeHidden = localStorage.getItem('homepath_welcome_hidden') === 'true';
+
+            if (authed) {
+                document.getElementById('welcomeModal').classList.add('hidden');
+                const stored = loadProfileFromStorage();
+                if (stored) populateSettingsFromData(stored);
+                showScreen('settings-screen');
+            } else {
+                showScreen('home-screen');
+                if (welcomeHidden) {
+                    document.getElementById('welcomeModal').classList.add('hidden');
+                } else {
+                    document.getElementById('welcomeModal').classList.remove('hidden');
+                }
+            }
+        });
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLMXwr9sKwVV28V3hzeJzrD6h0X-4w0d0&libraries=places&callback=initMap" async defer></script>
 </body>

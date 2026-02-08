@@ -53,7 +53,7 @@ def save_data(
             "drinking": drinking_habit
         }
     }
-    store_data(data, f"{user_id}.json")
+    return store_data(data, f"{user_id}.json")
 
 def store_data(data, filename):
     """
@@ -68,10 +68,19 @@ def store_data(data, filename):
     """
     try:
         filepath = os.path.join(DATABASE_DIR, filename)
+        # Ensure directory exists and is writable
+        if not os.path.exists(DATABASE_DIR):
+            os.makedirs(DATABASE_DIR, exist_ok=True)
+        if not os.access(DATABASE_DIR, os.W_OK):
+            print(f"Write permission denied for directory: {DATABASE_DIR}")
+            return False
         with open(filepath, 'w') as f:
             json.dump(data, f, indent=4)
         print(f"Data successfully stored in {filepath}")
         return True
+    except PermissionError:
+        print(f"Permission error: Cannot write to {filepath}")
+        return False
     except Exception as e:
         print(f"Error storing data: {e}")
         return False

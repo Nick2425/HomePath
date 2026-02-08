@@ -1,0 +1,20 @@
+{
+    "password": "iloveved<3",
+    "facial_data": null,
+    "user_id": "Anika5254",
+    "pets": [
+        "cat"
+    ],
+    "personal_info": {
+        "name": "Anika Gupta",
+        "phone_number": "289 998 2359",
+        "can_be_found_at": "Your Room",
+        "age": "18",
+        "sex_at_birth": "female",
+        "dependents": 0
+    },
+    "habits": {
+        "smoking": "non-smoker",
+        "drinking": "non-drinker"
+    }
+}
