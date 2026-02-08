@@ -212,7 +212,7 @@
                                 facialData: ''
                             };
                             try {
-                                const res = await fetch('http://localhost:5000/save-profile', {
+                                const res = await fetch('/save-profile', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify(data)
@@ -221,7 +221,7 @@
                                 if (body.success) {
                                     msgEl.innerText = 'Account created! Logging you in...';
                                     // Always try to fetch and load profile
-                                    fetch('http://localhost:5000/load-profile/' + encodeURIComponent(userId))
+                                    fetch('/load-profile/' + encodeURIComponent(userId))
                                         .then(res => res.json())
                                         .then(profile => {
                                             if(profile.success && profile.data.password === password) {
@@ -391,7 +391,7 @@
             const msgEl = document.getElementById('loginMessage');
             if(!userId){ msgEl.innerText = 'Enter User ID'; return; }
             try {
-                const res = await fetch('http://localhost:5000/load-profile/' + encodeURIComponent(userId));
+                const res = await fetch('/load-profile/' + encodeURIComponent(userId));
                 const body = await res.json();
                 if(body.success && body.data.password === password) {
                     enterAuthenticated(body.data);
@@ -421,7 +421,7 @@
                     other: document.getElementById('pet_other').checked
                 }
             };
-            fetch('http://localhost:5000/save-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+            fetch('/save-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
             .then(res => res.json()).then(res => {
                 if (res.success) {
                     // Keep local storage in sync so fields don't appear cleared later
